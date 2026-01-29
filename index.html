@@ -580,6 +580,17 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
 
+        .btn-help {
+            background: linear-gradient(135deg, #20c997, #0ca678);
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-help:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
         .message {
             text-align: center;
             margin-top: 20px;
@@ -657,6 +668,7 @@
         <div class="buttons">
             <button class="btn-reset" onclick="resetGame()">新しいゲーム</button>
             <button class="btn-undo" id="undo-btn" onclick="undoMove()" disabled>1手戻す</button>
+            <button class="btn-help" onclick="showHelp()">❓ 遊び方</button>
             <button class="btn-quit" onclick="quitGame()">終了</button>
         </div>
 
@@ -685,6 +697,61 @@
             <div class="acupoint-section">
                 <div class="acupoint-section-title">📝 備考</div>
                 <div class="acupoint-section-content" id="acupoint-notes"></div>
+            </div>
+            <div class="acupoint-close-hint">👆 ×ボタンまたはポップアップ外をタップで閉じます</div>
+        </div>
+
+        <!-- 遊び方説明ポップアップ -->
+        <div class="acupoint-overlay" id="help-overlay" onclick="hideHelp()"></div>
+        <div class="acupoint-info" id="help-info">
+            <div class="acupoint-info-header">
+                <div>
+                    <div class="acupoint-name">❓ 遊び方</div>
+                    <div class="acupoint-reading">ビー玉ソリティアの楽しみ方</div>
+                </div>
+                <button onclick="hideHelp()" style="background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">🎯 ゲームの目的</div>
+                <div class="acupoint-section-content">
+                    ビー玉を飛び越えて消していき、<strong>最後の1個を中央に残す</strong>ことを目指します。
+                </div>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">📱 基本操作</div>
+                <div class="acupoint-section-content">
+                    <strong>短押し（タップ）：</strong><br>
+                    ① ビー玉を選択<br>
+                    ② 移動先を選択<br>
+                    <br>
+                    <strong>長押し（0.5秒）：</strong><br>
+                    ビー玉の経穴（ツボ）情報を表示
+                </div>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">🎲 ルール</div>
+                <div class="acupoint-section-content">
+                    1️⃣ <strong>移動方法：</strong>隣のビー玉を飛び越えて、その先の空きマスに移動<br>
+                    2️⃣ <strong>消える：</strong>飛び越えられたビー玉は消える<br>
+                    3️⃣ <strong>方向：</strong>上下左右のみ（斜めは不可）<br>
+                    4️⃣ <strong>目標：</strong>最後の1個を中央に残す
+                </div>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">💡 コツ</div>
+                <div class="acupoint-section-content">
+                    • 中央から外側に向かって消していく<br>
+                    • 孤立したビー玉を作らない<br>
+                    • 「1手戻す」ボタンでやり直し可能<br>
+                    • 何度も挑戦して最短手数を目指そう！
+                </div>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">📚 学習機能</div>
+                <div class="acupoint-section-content">
+                    各ビー玉にはWHO標準化361経穴の名前がついています。<br>
+                    ゲームを楽しみながら、自然に経穴を覚えられます！
+                </div>
             </div>
             <div class="acupoint-close-hint">👆 ×ボタンまたはポップアップ外をタップで閉じます</div>
         </div>
@@ -3650,6 +3717,16 @@
             isLongPress = false;
         }
 
+        function showHelp() {
+            document.getElementById('help-overlay').classList.add('show');
+            document.getElementById('help-info').classList.add('show');
+        }
+
+        function hideHelp() {
+            document.getElementById('help-overlay').classList.remove('show');
+            document.getElementById('help-info').classList.remove('show');
+        }
+
         function initBoard() {
             board = INITIAL_BOARD.map(row => [...row]);
             selectedCell = null;
@@ -3999,3 +4076,4 @@
 
 </body>
 </html>
+

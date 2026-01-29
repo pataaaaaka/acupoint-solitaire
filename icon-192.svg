@@ -1,0 +1,26 @@
+<svg width="192" height="192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357abd;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="192" height="192" fill="url(#bg)" rx="28.799999999999997"/>
+  
+  <!-- Board grid (simplified) -->
+  <g transform="translate(38.400000000000006, 38.400000000000006)">
+    <rect x="0" y="28.799999999999997" width="115.19999999999999" height="19.200000000000003" fill="white" opacity="0.3" rx="5"/>
+    <rect x="28.799999999999997" y="0" width="19.200000000000003" height="115.19999999999999" fill="white" opacity="0.3" rx="5"/>
+    <rect x="67.19999999999999" y="0" width="19.200000000000003" height="115.19999999999999" fill="white" opacity="0.3" rx="5"/>
+    <rect x="0" y="67.19999999999999" width="115.19999999999999" height="19.200000000000003" fill="white" opacity="0.3" rx="5"/>
+  </g>
+  
+  <!-- Marble (circle) -->
+  <circle cx="96.0" cy="96.0" r="23.04" fill="white" opacity="0.9"/>
+  <circle cx="96.0" cy="96.0" r="19.200000000000003" fill="#ffd700" opacity="0.8"/>
+  
+  <!-- Text -->
+  <text x="96.0" y="163.2" font-family="sans-serif" font-size="23.04" fill="white" text-anchor="middle" font-weight="bold">経穴</text>
+</svg>

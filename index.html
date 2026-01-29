@@ -1,0 +1,4001 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビー玉ソリティア</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* タブレット対応 */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .info {
+                font-size: 0.85em;
+            }
+        }
+
+        /* スマートフォン対応 */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.4em;
+                margin-bottom: 8px;
+            }
+
+            .info {
+                font-size: 0.8em;
+                margin-bottom: 15px;
+            }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* タブレット対応 */
+        @media (max-width: 768px) {
+            .stats {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .stat-label {
+                font-size: 0.75em;
+            }
+
+            .stat-value {
+                font-size: 1.3em;
+            }
+        }
+
+        /* スマートフォン対応 */
+        @media (max-width: 480px) {
+            .stats {
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+
+            .stat-label {
+                font-size: 0.7em;
+            }
+
+            .stat-value {
+                font-size: 1.2em;
+            }
+        }
+
+        .board {
+            display: inline-block;
+            padding: 30px;
+            background: linear-gradient(145deg, #d4a574, #c89860);
+            border-radius: 20px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            display: block;
+        }
+
+        .board-container {
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            margin: 3px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* タブレット対応 */
+        @media (max-width: 768px) {
+            .board {
+                padding: 20px;
+            }
+
+            .cell {
+                width: 45px;
+                height: 45px;
+                margin: 2.5px;
+            }
+        }
+
+        /* スマートフォン対応 */
+        @media (max-width: 480px) {
+            .board {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .cell {
+                width: 35px;
+                height: 35px;
+                margin: 2px;
+            }
+        }
+
+        /* 小さいスマートフォン対応 */
+        @media (max-width: 360px) {
+            .board {
+                padding: 10px;
+            }
+
+            .cell {
+                width: 30px;
+                height: 30px;
+                margin: 1.5px;
+            }
+        }
+
+        .cell.hole {
+            background: radial-gradient(circle at 30% 30%, #8b6f47, #6b5437);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .cell.empty {
+            background: radial-gradient(circle at 30% 30%, #a0826d, #8b6f47);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .cell.invalid {
+            background: transparent;
+            cursor: default;
+        }
+
+        .marble {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset -2px -2px 4px rgba(0,0,0,0.2),
+                inset 2px 2px 4px rgba(255,255,255,0.3);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            line-height: 1.1;
+            text-align: center;
+            padding: 2px;
+        }
+
+        /* 経絡ごとの色分け - カラフルなビー玉 */
+        /* 肺経 - 白/シルバー系 */
+        .cell:nth-child(7n+1) .marble {
+            background: radial-gradient(circle at 30% 30%, #e3e3e3, #a0a0a0);
+            color: #333;
+        }
+        
+        /* 大腸経 - ベージュ系 */
+        .cell:nth-child(7n+2) .marble {
+            background: radial-gradient(circle at 30% 30%, #ffd8a8, #e67700);
+        }
+        
+        /* 胃経 - イエロー系 */
+        .cell:nth-child(7n+3) .marble {
+            background: radial-gradient(circle at 30% 30%, #ffe066, #fab005);
+        }
+        
+        /* 脾経 - オレンジ系 */
+        .cell:nth-child(7n+4) .marble {
+            background: radial-gradient(circle at 30% 30%, #ffa94d, #fd7e14);
+        }
+        
+        /* 心経 - レッド系 */
+        .cell:nth-child(7n+5) .marble {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+        }
+        
+        /* 腎経 - ブルー/ブラック系 */
+        .cell:nth-child(7n+6) .marble {
+            background: radial-gradient(circle at 30% 30%, #4c6ef5, #1864ab);
+        }
+        
+        /* 肝経 - グリーン系 */
+        .cell:nth-child(7n) .marble {
+            background: radial-gradient(circle at 30% 30%, #51cf66, #2f9e44);
+        }
+
+        .marble::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.6), transparent);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        /* タブレット対応 */
+        @media (max-width: 768px) {
+            .marble {
+                width: 36px;
+                height: 36px;
+                font-size: 10px;
+            }
+
+            .marble::before {
+                top: 5px;
+                left: 5px;
+                width: 9px;
+                height: 9px;
+            }
+        }
+
+        /* スマートフォン対応 */
+        @media (max-width: 480px) {
+            .marble {
+                width: 28px;
+                height: 28px;
+                font-size: 8px;
+                box-shadow: 
+                    0 3px 6px rgba(0,0,0,0.3),
+                    inset -1px -1px 3px rgba(0,0,0,0.2),
+                    inset 1px 1px 3px rgba(255,255,255,0.3);
+            }
+
+            .marble::before {
+                top: 4px;
+                left: 4px;
+                width: 7px;
+                height: 7px;
+            }
+        }
+
+        /* 小さいスマートフォン対応 */
+        @media (max-width: 360px) {
+            .marble {
+                width: 24px;
+                height: 24px;
+                font-size: 7px;
+            }
+
+            .marble::before {
+                top: 3px;
+                left: 3px;
+                width: 6px;
+                height: 6px;
+            }
+        }
+
+        /* ツボ説明パネル */
+        .acupoint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .acupoint-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .acupoint-info {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .acupoint-info.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .acupoint-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .acupoint-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .acupoint-reading {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .acupoint-meridian {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .acupoint-section {
+            margin-bottom: 12px;
+        }
+
+        .acupoint-section-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .acupoint-section-content {
+            color: #555;
+            line-height: 1.6;
+            font-size: 0.9em;
+        }
+
+        .acupoint-close-hint {
+            text-align: center;
+            color: #999;
+            font-size: 0.8em;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* タブレット・スマホ対応 */
+        @media (max-width: 768px) {
+            .acupoint-info {
+                bottom: 10px;
+                padding: 15px;
+                max-width: 95%;
+            }
+
+            .acupoint-name {
+                font-size: 1.3em;
+            }
+
+            .acupoint-meridian {
+                font-size: 0.8em;
+                padding: 4px 12px;
+            }
+
+            .acupoint-section-title {
+                font-size: 0.9em;
+            }
+
+            .acupoint-section-content {
+                font-size: 0.85em;
+            }
+        }
+
+        .cell.selected {
+            background: radial-gradient(circle at 30% 30%, #ffd700, #ffed4e);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+
+        .cell.valid-move {
+            background: radial-gradient(circle at 30% 30%, #90ee90, #5cb85c);
+            box-shadow: 0 0 15px rgba(90, 238, 90, 0.6);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* タブレット対応 */
+        @media (max-width: 768px) {
+            .buttons {
+                gap: 8px;
+                margin-top: 15px;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 0.95em;
+            }
+        }
+
+        /* スマートフォン対応 */
+        @media (max-width: 480px) {
+            .buttons {
+                gap: 8px;
+                margin-top: 12px;
+            }
+
+            button {
+                padding: 10px 18px;
+                font-size: 0.9em;
+                border-radius: 20px;
+            }
+        }
+
+        /* 小さいスマートフォン対応 */
+        @media (max-width: 360px) {
+            button {
+                padding: 8px 16px;
+                font-size: 0.85em;
+            }
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-undo {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn-undo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-undo:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-quit {
+            background: linear-gradient(135deg, #868e96, #495057);
+            color: white;
+        }
+
+        .btn-quit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            white-space: pre-line;
+        }
+
+        .message.win {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .message.info {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        /* タブレット対応 */
+        @media (max-width: 768px) {
+            .message {
+                margin-top: 15px;
+                padding: 12px;
+                font-size: 1em;
+            }
+        }
+
+        /* スマートフォン対応 */
+        @media (max-width: 480px) {
+            .message {
+                margin-top: 12px;
+                padding: 10px;
+                font-size: 0.9em;
+                border-radius: 8px;
+            }
+        }
+    </style>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="経穴ソリティア">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
+    <link rel="apple-touch-icon" href="icon-192.svg">
+    <meta name="theme-color" content="#4a90e2">
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 ビー玉ソリティア</h1>
+        <div class="info">
+            ツボの名前を覚えながら遊ぼう！ビー玉を飛び越えて最後の1個を目指そう！
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">残りのビー玉</div>
+                <div class="stat-value" id="marbles-count">32</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">手数</div>
+                <div class="stat-value" id="moves-count">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">経過時間</div>
+                <div class="stat-value" id="timer">0:00</div>
+            </div>
+        </div>
+
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-reset" onclick="resetGame()">新しいゲーム</button>
+            <button class="btn-undo" id="undo-btn" onclick="undoMove()" disabled>1手戻す</button>
+            <button class="btn-quit" onclick="quitGame()">終了</button>
+        </div>
+
+        <div id="message"></div>
+
+        <div class="acupoint-overlay" id="acupoint-overlay" onclick="hideAcupointInfo()"></div>
+        <div class="acupoint-info" id="acupoint-info">
+            <div class="acupoint-info-header">
+                <div>
+                    <div class="acupoint-name" id="acupoint-name">合谷</div>
+                    <div class="acupoint-reading" id="acupoint-reading">ごうこく</div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="acupoint-meridian" id="acupoint-meridian">手陽明大腸経</div>
+                    <button onclick="hideAcupointInfo()" style="background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+                </div>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">🔖 ID</div>
+                <div class="acupoint-section-content" id="acupoint-id"></div>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">📍 位置</div>
+                <div class="acupoint-section-content" id="acupoint-location"></div>
+            </div>
+            <div class="acupoint-section">
+                <div class="acupoint-section-title">📝 備考</div>
+                <div class="acupoint-section-content" id="acupoint-notes"></div>
+            </div>
+            <div class="acupoint-close-hint">👆 ×ボタンまたはポップアップ外をタップで閉じます</div>
+        </div>
+    </div>
+
+    <script>
+        // ボードの初期配置（7x7の十字型）
+        const INITIAL_BOARD = [
+            [null, null, 1, 1, 1, null, null],
+            [null, null, 1, 1, 1, null, null],
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 0, 1, 1, 1],  // 中央が空
+            [1, 1, 1, 1, 1, 1, 1],
+            [null, null, 1, 1, 1, null, null],
+            [null, null, 1, 1, 1, null, null]
+        ];
+
+        // 代表的な経穴（ツボ）の名前リスト
+        const ACUPOINTS = [
+  "中府",
+  "雲門",
+  "天府",
+  "侠白",
+  "尺沢",
+  "孔最",
+  "列欠",
+  "経渠",
+  "太淵",
+  "魚際",
+  "少商",
+  "商陽",
+  "二間",
+  "三間",
+  "合谷",
+  "陽渓",
+  "偏歴",
+  "温溜",
+  "下廉",
+  "上廉",
+  "手三里",
+  "曲池",
+  "肘髎",
+  "手五里",
+  "臂臑",
+  "肩髃",
+  "巨骨",
+  "天鼎",
+  "扶突",
+  "禾髎",
+  "迎香",
+  "承泣",
+  "四白",
+  "巨髎",
+  "地倉",
+  "大迎",
+  "頬車",
+  "下関",
+  "頭維",
+  "人迎",
+  "水突",
+  "気舎",
+  "欠盆",
+  "気戸",
+  "庫房",
+  "屋翳",
+  "膺窓",
+  "乳中",
+  "乳根",
+  "不容",
+  "承満",
+  "梁門",
+  "関門",
+  "太乙",
+  "滑肉門",
+  "天枢",
+  "外陵",
+  "大巨",
+  "水道",
+  "帰来",
+  "気衝",
+  "髀関",
+  "伏兎",
+  "陰市",
+  "梁丘",
+  "犢鼻",
+  "足三里",
+  "上巨虚",
+  "条口",
+  "下巨虚",
+  "豊隆",
+  "解渓",
+  "衝陽",
+  "陥谷",
+  "内庭",
+  "厲兌",
+  "隠白",
+  "大都",
+  "太白",
+  "公孫",
+  "商丘",
+  "三陰交",
+  "漏谷",
+  "地機",
+  "陰陵泉",
+  "血海",
+  "箕門",
+  "衝門",
+  "府舎",
+  "腹結",
+  "大横",
+  "腹哀",
+  "食竇",
+  "天渓",
+  "胸郷",
+  "周栄",
+  "大包",
+  "極泉",
+  "青霊",
+  "少海",
+  "霊道",
+  "通里",
+  "陰郄",
+  "神門",
+  "少府",
+  "少衝",
+  "少沢",
+  "前谷",
+  "後渓",
+  "腕骨",
+  "陽谷",
+  "養老",
+  "支正",
+  "小海",
+  "肩貞",
+  "臑兪",
+  "天宗",
+  "秉風",
+  "曲垣",
+  "肩外兪",
+  "肩中兪",
+  "天窓",
+  "天容",
+  "顴髎",
+  "聴宮",
+  "睛明",
+  "攅竹",
+  "眉衝",
+  "曲差",
+  "五処",
+  "承光",
+  "通天",
+  "絡却",
+  "玉枕",
+  "天柱",
+  "大杼",
+  "風門",
+  "肺兪",
+  "厥陰兪",
+  "心兪",
+  "督兪",
+  "膈兪",
+  "肝兪",
+  "胆兪",
+  "脾兪",
+  "胃兪",
+  "三焦兪",
+  "腎兪",
+  "気海兪",
+  "大腸兪",
+  "関元兪",
+  "小腸兪",
+  "膀胱兪",
+  "中膂兪",
+  "白環兪",
+  "上髎",
+  "次髎",
+  "中髎",
+  "下髎",
+  "会陽",
+  "承扶",
+  "殷門",
+  "浮郄",
+  "委陽",
+  "委中",
+  "附分",
+  "魄戸",
+  "膏肓",
+  "神堂",
+  "譩譆",
+  "膈関",
+  "魂門",
+  "陽綱",
+  "意舎",
+  "胃倉",
+  "肓門",
+  "志室",
+  "胞肓",
+  "秩辺",
+  "合陽",
+  "承筋",
+  "承山",
+  "飛揚",
+  "跗陽",
+  "崑崙",
+  "僕参",
+  "申脈",
+  "金門",
+  "京骨",
+  "束骨",
+  "足通谷",
+  "至陰",
+  "湧泉",
+  "然谷",
+  "太渓",
+  "大鐘",
+  "水泉",
+  "照海",
+  "復溜",
+  "交信",
+  "築賓",
+  "陰谷",
+  "横骨",
+  "大赫",
+  "気穴",
+  "四満",
+  "中注",
+  "肓兪",
+  "商曲",
+  "石関",
+  "陰都",
+  "腹通谷",
+  "幽門",
+  "歩廊",
+  "神封",
+  "霊墟",
+  "神蔵",
+  "彧中",
+  "兪府",
+  "天池",
+  "天泉",
+  "曲沢",
+  "郄門",
+  "間使",
+  "内関",
+  "大陵",
+  "労宮",
+  "中衝",
+  "関衝",
+  "液門",
+  "中渚",
+  "陽池",
+  "外関",
+  "支溝",
+  "会宗",
+  "三陽絡",
+  "四瀆",
+  "天井",
+  "清冷淵",
+  "消濼",
+  "臑会",
+  "肩髎",
+  "天髎",
+  "天牖",
+  "翳風",
+  "瘛脈",
+  "顱息",
+  "角孫",
+  "耳門",
+  "和髎",
+  "糸竹空",
+  "瞳子髎",
+  "聴会",
+  "上関",
+  "頷厭",
+  "懸顱",
+  "懸釐",
+  "曲鬢",
+  "率谷",
+  "天衝",
+  "浮白",
+  "頭竅陰",
+  "完骨",
+  "本神",
+  "陽白",
+  "頭臨泣",
+  "目窓",
+  "正営",
+  "承霊",
+  "脳空",
+  "風池",
+  "肩井",
+  "淵腋",
+  "輒筋",
+  "日月",
+  "京門",
+  "帯脈",
+  "五枢",
+  "維道",
+  "居髎",
+  "環跳",
+  "風市",
+  "中瀆",
+  "膝陽関",
+  "陽陵泉",
+  "陽交",
+  "外丘",
+  "光明",
+  "陽輔",
+  "懸鐘",
+  "丘墟",
+  "足臨泣",
+  "地五会",
+  "侠渓",
+  "足竅陰",
+  "大敦",
+  "行間",
+  "太衝",
+  "中封",
+  "蠡溝",
+  "中都",
+  "膝関",
+  "曲泉",
+  "陰包",
+  "足五里",
+  "陰廉",
+  "急脈",
+  "章門",
+  "期門",
+  "長強",
+  "腰兪",
+  "腰陽関",
+  "命門",
+  "懸枢",
+  "脊中",
+  "中枢",
+  "筋縮",
+  "至陽",
+  "霊台",
+  "神道",
+  "身柱",
+  "陶道",
+  "大椎",
+  "瘂門",
+  "風府",
+  "脳戸",
+  "強間",
+  "後頂",
+  "百会",
+  "前頂",
+  "囟会",
+  "上星",
+  "神庭",
+  "素髎",
+  "水溝",
+  "兌端",
+  "齦交",
+  "会陰",
+  "曲骨",
+  "中極",
+  "関元",
+  "石門",
+  "気海",
+  "陰交",
+  "神闕",
+  "水分",
+  "下脘",
+  "建里",
+  "中脘",
+  "上脘",
+  "巨闕",
+  "鳩尾",
+  "中庭",
+  "膻中",
+  "玉堂",
+  "紫宮",
+  "華蓋",
+  "璇璣",
+  "天突",
+  "廉泉",
+  "承漿"
+];
+
+        // ツボの詳細情報データベース
+        const ACUPOINT_DATA = {
+  "中府": {
+    "id": "LU1",
+    "reading": "ちゅうふ",
+    "meridian": "手太陰肺経",
+    "location": "前胸部、第1肋間と同じ高さ、鎖骨下窩の外側、前正中線の外方6寸",
+    "notes": "肺の募穴"
+  },
+  "雲門": {
+    "id": "LU2",
+    "reading": "うんもん",
+    "meridian": "手太陰肺経",
+    "location": "前胸部、鎖骨下窩の陥凹部、烏口突起の内方、前正中線の外方6寸",
+    "notes": ""
+  },
+  "天府": {
+    "id": "LU3",
+    "reading": "てんぷ",
+    "meridian": "手太陰肺経",
+    "location": "上腕前外側、上腕二頭筋外側縁、腋窩横紋前端の下方3寸",
+    "notes": ""
+  },
+  "侠白": {
+    "id": "LU4",
+    "reading": "きょうはく",
+    "meridian": "手太陰肺経",
+    "location": "上腕前外側、上腕二頭筋外側縁、腋窩横紋前端の下方4寸",
+    "notes": ""
+  },
+  "尺沢": {
+    "id": "LU5",
+    "reading": "しゃくたく",
+    "meridian": "手太陰肺経",
+    "location": "肘前部、肘窩横紋上、上腕二頭筋腱外方の陥凹部",
+    "notes": "肺経の合水穴"
+  },
+  "孔最": {
+    "id": "LU6",
+    "reading": "こうさい",
+    "meridian": "手太陰肺経",
+    "location": "前腕前外側、尺沢と太淵を結ぶ線上、手関節掌側横紋の上方7寸",
+    "notes": "肺経の郄穴"
+  },
+  "列欠": {
+    "id": "LU7",
+    "reading": "れっけつ",
+    "meridian": "手太陰肺経",
+    "location": "前腕撓側、長母指外転筋腱と短母指伸筋腱の間、手関節掌側横紋の上方1寸5分",
+    "notes": "肺経の絡穴、四総穴、八脈交会穴"
+  },
+  "経渠": {
+    "id": "LU8",
+    "reading": "けいきょ",
+    "meridian": "手太陰肺経",
+    "location": "前腕前外側、橈骨下端の撓側で外側の最も突出した部位と橈骨動脈の間、手関節掌側横紋の上方１寸",
+    "notes": "肺経の経金穴"
+  },
+  "太淵": {
+    "id": "LU9",
+    "reading": "たいえん",
+    "meridian": "手太陰肺経",
+    "location": "手関節前外側、橈骨茎状突起と舟状骨の間、長母指外転筋腱の尺側陥凹部",
+    "notes": "肺の原穴、肺経の兪土穴、八会穴の脈会"
+  },
+  "魚際": {
+    "id": "LU10",
+    "reading": "ぎょさい",
+    "meridian": "手太陰肺経",
+    "location": "手掌、第1中手骨中点の撓側、赤白肉際",
+    "notes": "肺経の栄火穴"
+  },
+  "少商": {
+    "id": "LU11",
+    "reading": "しょうしょう",
+    "meridian": "手太陰肺経",
+    "location": "母指、末節骨末端、爪甲角の近位外方1分、爪甲撓側縁の垂線と爪甲基底部の水平線との交点",
+    "notes": "肺経の井木穴"
+  },
+  "商陽": {
+    "id": "LI1",
+    "reading": "しょうよう",
+    "meridian": "手陽明大腸経",
+    "location": "示指、末節骨橈側、爪甲角の近位外方1分、爪甲撓側縁の垂線と爪甲基底部の水平線の交点",
+    "notes": "大腸経の井金穴"
+  },
+  "二間": {
+    "id": "LI2",
+    "reading": "じかん",
+    "meridian": "手陽明大腸経",
+    "location": "示指、第２中手指節関節撓側の遠位陥凹部、赤白肉際",
+    "notes": "大腸経の栄水穴"
+  },
+  "三間": {
+    "id": "LI3",
+    "reading": "さんかん",
+    "meridian": "手陽明大腸経",
+    "location": "手背、第２中手指節関節撓側の近位陥凹部",
+    "notes": "大腸経の兪木穴"
+  },
+  "合谷": {
+    "id": "LI4",
+    "reading": "ごうこく",
+    "meridian": "手陽明大腸経",
+    "location": "手背、第２中手骨中点の撓側",
+    "notes": "大腸の原穴、四総穴"
+  },
+  "陽渓": {
+    "id": "LI5",
+    "reading": "ようけい",
+    "meridian": "手陽明大腸経",
+    "location": "手関節後外側、手関節背側横紋撓側、撓骨茎状突起の遠位、タバコ窩",
+    "notes": "大腸経の経火穴"
+  },
+  "偏歴": {
+    "id": "LI6",
+    "reading": "へんれき",
+    "meridian": "手陽明大腸経",
+    "location": "前腕後外側、陽渓と曲池を結ぶ線上、手関節背側横紋の上方3寸",
+    "notes": "大腸経の絡穴"
+  },
+  "温溜": {
+    "id": "LI7",
+    "reading": "おんる",
+    "meridian": "手陽明大腸経",
+    "location": "前腕後外側、陽渓と曲池を結ぶ線上、手関節背側横紋の上方5寸",
+    "notes": "大腸経の郄穴"
+  },
+  "下廉": {
+    "id": "LI8",
+    "reading": "げれん",
+    "meridian": "手陽明大腸経",
+    "location": "前腕後外側、陽渓と曲池を結ぶ線上、肘窩横紋の下方4寸",
+    "notes": ""
+  },
+  "上廉": {
+    "id": "LI9",
+    "reading": "じょうれん",
+    "meridian": "手陽明大腸経",
+    "location": "前腕後外側、陽渓と曲池を結ぶ線上、肘窩横紋の下方3寸",
+    "notes": ""
+  },
+  "手三里": {
+    "id": "LI10",
+    "reading": "てさんり",
+    "meridian": "手陽明大腸経",
+    "location": "前腕後外側、陽渓と曲池を結ぶ線上、肘窩横紋の下方2寸",
+    "notes": ""
+  },
+  "曲池": {
+    "id": "LI11",
+    "reading": "きょくち",
+    "meridian": "手陽明大腸経",
+    "location": "肘外側、尺沢と上腕骨外側上顆を結ぶ線上の中点",
+    "notes": "大腸経の合土穴"
+  },
+  "肘髎": {
+    "id": "LI12",
+    "reading": "ちゅうりょう",
+    "meridian": "手陽明大腸経",
+    "location": "肘後外側、上腕骨外側上顆の上縁、外側顆上稜の前縁",
+    "notes": ""
+  },
+  "手五里": {
+    "id": "LI13",
+    "reading": "てごり",
+    "meridian": "手陽明大腸経",
+    "location": "上腕外側、曲池と肩髃を結ぶ線上、肘窩横紋の上方3寸",
+    "notes": ""
+  },
+  "臂臑": {
+    "id": "LI14",
+    "reading": "ひじゅ",
+    "meridian": "手陽明大腸経",
+    "location": "上腕外側、三角筋前縁、曲池の上方7寸",
+    "notes": ""
+  },
+  "肩髃": {
+    "id": "LI15",
+    "reading": "けんぐう",
+    "meridian": "手陽明大腸経",
+    "location": "肩周囲部、肩峰外縁の前端と上腕骨大結節の間の陥凹部",
+    "notes": ""
+  },
+  "巨骨": {
+    "id": "LI16",
+    "reading": "ここつ",
+    "meridian": "手陽明大腸経",
+    "location": "肩周囲部、鎖骨の肩峰端と肩甲棘の間の陥凹部",
+    "notes": ""
+  },
+  "天鼎": {
+    "id": "LI17",
+    "reading": "てんてい",
+    "meridian": "手陽明大腸経",
+    "location": "前頸部、輪状軟骨と同じ高さ、胸鎖乳突筋の後縁",
+    "notes": ""
+  },
+  "扶突": {
+    "id": "LI18",
+    "reading": "ふとつ",
+    "meridian": "手陽明大腸経",
+    "location": "前頸部、甲状軟骨上縁と同じ高さ、胸鎖乳突筋の前縁と後縁の間",
+    "notes": ""
+  },
+  "禾髎": {
+    "id": "LI19",
+    "reading": "かりょう",
+    "meridian": "手陽明大腸経",
+    "location": "顔面部、人中溝中点と同じ高さ、鼻孔外縁の下方",
+    "notes": ""
+  },
+  "迎香": {
+    "id": "LI20",
+    "reading": "げいこう",
+    "meridian": "手陽明大腸経",
+    "location": "顔面部、鼻唇溝中、鼻翼外縁中点と同じ高さ",
+    "notes": ""
+  },
+  "承泣": {
+    "id": "ST1",
+    "reading": "しょうきゅう",
+    "meridian": "足陽明胃経",
+    "location": "顔面部、眼球と眼窩下縁の中央、瞳孔線上",
+    "notes": ""
+  },
+  "四白": {
+    "id": "ST2",
+    "reading": "しはく",
+    "meridian": "足陽明胃経",
+    "location": "顔面部、眼窩下孔部",
+    "notes": ""
+  },
+  "巨髎": {
+    "id": "ST3",
+    "reading": "こりょう",
+    "meridian": "足陽明胃経",
+    "location": "顔面部、瞳孔線上、鼻翼下縁と同じ高さ",
+    "notes": ""
+  },
+  "地倉": {
+    "id": "ST4",
+    "reading": "ちそう",
+    "meridian": "足陽明胃経",
+    "location": "顔面部、口角の外方４分",
+    "notes": ""
+  },
+  "大迎": {
+    "id": "ST5",
+    "reading": "だいげい",
+    "meridian": "足陽明胃経",
+    "location": "顔面部、下顎角の前方、咬筋付着部の前方陥凹部、顔面動脈上",
+    "notes": ""
+  },
+  "頬車": {
+    "id": "ST6",
+    "reading": "きょうしゃ",
+    "meridian": "足陽明胃経",
+    "location": "顔面部、下顎角の前上方1横指",
+    "notes": ""
+  },
+  "下関": {
+    "id": "ST7",
+    "reading": "げかん",
+    "meridian": "足陽明胃経",
+    "location": "顔面部、頬骨弓の下縁中点と下顎切痕の間の陥凹部",
+    "notes": ""
+  },
+  "頭維": {
+    "id": "ST8",
+    "reading": "ずい",
+    "meridian": "足陽明胃経",
+    "location": "頭部、額角髪際の直上5分、前正中線の外方4寸5分",
+    "notes": ""
+  },
+  "人迎": {
+    "id": "ST9",
+    "reading": "じんげい",
+    "meridian": "足陽明胃経",
+    "location": "前頸部、甲状軟骨上縁と同じ高さ、胸鎖乳突筋の前縁、総頸動脈上",
+    "notes": ""
+  },
+  "水突": {
+    "id": "ST10",
+    "reading": "すいとつ",
+    "meridian": "足陽明胃経",
+    "location": "前頸部、輪状軟骨と同じ高さ、胸鎖乳突筋の前縁",
+    "notes": ""
+  },
+  "気舎": {
+    "id": "ST11",
+    "reading": "きしゃ",
+    "meridian": "足陽明胃経",
+    "location": "前頸部、小鎖骨上窩で鎖骨胸骨端の上方、胸鎖乳突筋の胸骨頭と鎖骨頭の間の陥凹部",
+    "notes": ""
+  },
+  "欠盆": {
+    "id": "ST12",
+    "reading": "けつぼん",
+    "meridian": "足陽明胃経",
+    "location": "前頸部、大鎖骨上窩、前正中線の外方4寸、鎖骨上方の陥凹部",
+    "notes": ""
+  },
+  "気戸": {
+    "id": "ST13",
+    "reading": "きこ",
+    "meridian": "足陽明胃経",
+    "location": "前胸部、鎖骨下際、前正中線の外方４寸",
+    "notes": ""
+  },
+  "庫房": {
+    "id": "ST14",
+    "reading": "こぼう",
+    "meridian": "足陽明胃経",
+    "location": "前胸部、第1肋間、前正中線の外方4寸",
+    "notes": ""
+  },
+  "屋翳": {
+    "id": "ST15",
+    "reading": "おくえい",
+    "meridian": "足陽明胃経",
+    "location": "前胸部、第2肋間、前正中線の外方4寸",
+    "notes": ""
+  },
+  "膺窓": {
+    "id": "ST16",
+    "reading": "ようそう",
+    "meridian": "足陽明胃経",
+    "location": "前胸部、第3肋間、前正中線の外方4寸",
+    "notes": ""
+  },
+  "乳中": {
+    "id": "ST17",
+    "reading": "にゅうちゅう",
+    "meridian": "足陽明胃経",
+    "location": "前胸部、乳頭中央",
+    "notes": ""
+  },
+  "乳根": {
+    "id": "ST18",
+    "reading": "にゅうこん",
+    "meridian": "足陽明胃経",
+    "location": "前胸部、第5肋間、前正中線の外方4寸",
+    "notes": ""
+  },
+  "不容": {
+    "id": "ST19",
+    "reading": "ふよう",
+    "meridian": "足陽明胃経",
+    "location": "上腹部、臍中央の上方6寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "承満": {
+    "id": "ST20",
+    "reading": "しょうまん",
+    "meridian": "足陽明胃経",
+    "location": "上腹部、臍中央の上方5寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "梁門": {
+    "id": "ST21",
+    "reading": "りょうもん",
+    "meridian": "足陽明胃経",
+    "location": "上腹部、臍中央の上方4寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "関門": {
+    "id": "ST22",
+    "reading": "かんもん",
+    "meridian": "足陽明胃経",
+    "location": "上腹部、臍中央の上方3寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "太乙": {
+    "id": "ST23",
+    "reading": "たいいつ",
+    "meridian": "足陽明胃経",
+    "location": "上腹部、臍中央の上方2寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "滑肉門": {
+    "id": "ST24",
+    "reading": "かつにくもん",
+    "meridian": "足陽明胃経",
+    "location": "上腹部、臍中央の上方1寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "天枢": {
+    "id": "ST25",
+    "reading": "てんすう",
+    "meridian": "足陽明胃経",
+    "location": "上腹部、臍中央の外方２寸",
+    "notes": "大腸の募穴"
+  },
+  "外陵": {
+    "id": "ST26",
+    "reading": "がいりょう",
+    "meridian": "足陽明胃経",
+    "location": "下腹部、臍中央の下方1寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "大巨": {
+    "id": "ST27",
+    "reading": "だいご",
+    "meridian": "足陽明胃経",
+    "location": "下腹部、臍中央の下方2寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "水道": {
+    "id": "ST28",
+    "reading": "すいどう",
+    "meridian": "足陽明胃経",
+    "location": "下腹部、臍中央の下方3寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "帰来": {
+    "id": "ST29",
+    "reading": "きらい",
+    "meridian": "足陽明胃経",
+    "location": "下腹部、臍中央の下方4寸、前正中線の外方2寸",
+    "notes": ""
+  },
+  "気衝": {
+    "id": "ST30",
+    "reading": "きしょう",
+    "meridian": "足陽明胃経",
+    "location": "鼠径部、恥骨結合上縁と同じ高さ、前正中線の外方2寸、大腿動脈拍動部",
+    "notes": ""
+  },
+  "髀関": {
+    "id": "ST31",
+    "reading": "ひかん",
+    "meridian": "足陽明胃経",
+    "location": "大腿前面、大腿直筋と縫工筋と大腿筋膜張筋の間の陥凹部",
+    "notes": ""
+  },
+  "伏兎": {
+    "id": "ST32",
+    "reading": "ふくと",
+    "meridian": "足陽明胃経",
+    "location": "大腿前外側、膝蓋骨底外端と上前腸骨棘を結ぶ線上、膝蓋骨底の上方6寸",
+    "notes": ""
+  },
+  "陰市": {
+    "id": "ST33",
+    "reading": "いんし",
+    "meridian": "足陽明胃経",
+    "location": "大腿前外側、大腿直筋縁の外側で膝蓋骨底の上方3寸",
+    "notes": ""
+  },
+  "梁丘": {
+    "id": "ST34",
+    "reading": "りょうきゅう",
+    "meridian": "足陽明胃経",
+    "location": "大腿前外側、外側広筋と大腿直筋腱外縁の間、膝蓋骨底の上方2寸",
+    "notes": "胃経の郄穴"
+  },
+  "犢鼻": {
+    "id": "ST35",
+    "reading": "とくび",
+    "meridian": "足陽明胃経",
+    "location": "膝前面、膝蓋靱帯外方の陥凹部",
+    "notes": ""
+  },
+  "足三里": {
+    "id": "ST36",
+    "reading": "あしさんり",
+    "meridian": "足陽明胃経",
+    "location": "下腿前面、犢鼻と解渓を結ぶ線上、犢鼻の下方３寸",
+    "notes": "胃経の合土穴、四総穴、胃の下合穴"
+  },
+  "上巨虚": {
+    "id": "ST37",
+    "reading": "じょうこきょ",
+    "meridian": "足陽明胃経",
+    "location": "下腿前面、犢鼻と解渓を結ぶ線上、犢鼻の下方6寸",
+    "notes": "大腸の下合穴"
+  },
+  "条口": {
+    "id": "ST38",
+    "reading": "じょうこう",
+    "meridian": "足陽明胃経",
+    "location": "下腿前面、犢鼻と解渓を結ぶ線上、犢鼻の下方8寸",
+    "notes": ""
+  },
+  "下巨虚": {
+    "id": "ST39",
+    "reading": "げこきょ",
+    "meridian": "足陽明胃経",
+    "location": "下腿前面、犢鼻と解渓を結ぶ線上、犢鼻の下方9寸",
+    "notes": "小腸の下合穴"
+  },
+  "豊隆": {
+    "id": "ST40",
+    "reading": "ほうりゅう",
+    "meridian": "足陽明胃経",
+    "location": "下腿前外側、前脛骨筋の外縁、外果尖の上方８寸",
+    "notes": "胃経の絡穴"
+  },
+  "解渓": {
+    "id": "ST41",
+    "reading": "かいけい",
+    "meridian": "足陽明胃経",
+    "location": "足関節前面、足関節前面中央の陥凹部、長母指伸筋腱と長指伸筋腱の間",
+    "notes": "胃経の経火穴"
+  },
+  "衝陽": {
+    "id": "ST42",
+    "reading": "しょうよう",
+    "meridian": "足陽明胃経",
+    "location": "足背、第２中足骨底部と中間楔状骨の間、足背動脈拍動部",
+    "notes": "胃の原穴"
+  },
+  "陥谷": {
+    "id": "ST43",
+    "reading": "かんこく",
+    "meridian": "足陽明胃経",
+    "location": "足背、第２・第3中足骨間、第2中足指節関節の近位陥凹部",
+    "notes": "胃経の兪木穴"
+  },
+  "内庭": {
+    "id": "ST44",
+    "reading": "ないてい",
+    "meridian": "足陽明胃経",
+    "location": "足背、第２・第3指間、みずかきの後縁、赤白肉際",
+    "notes": "胃経の栄水穴"
+  },
+  "厲兌": {
+    "id": "ST45",
+    "reading": "れいだ",
+    "meridian": "足陽明胃経",
+    "location": "足の第２指、末節骨外端、爪甲角の近位外方1分、爪甲外側縁の垂線と爪甲基底部の水平線との交点",
+    "notes": "胃経の井金穴"
+  },
+  "隠白": {
+    "id": "SP1",
+    "reading": "いんぱく",
+    "meridian": "足太陰脾経",
+    "location": "足の第１指、末節骨内側、爪甲角の近位内方１分",
+    "notes": "脾経の井木穴"
+  },
+  "大都": {
+    "id": "SP2",
+    "reading": "だいと",
+    "meridian": "足太陰脾経",
+    "location": "足の第１指、第1中足指節関節内側の遠位陥凹部、赤白肉際",
+    "notes": "脾経の栄火穴"
+  },
+  "太白": {
+    "id": "SP3",
+    "reading": "たいはく",
+    "meridian": "足太陰脾経",
+    "location": "足内側、第１中足指節関節内側の近位陥凹部、赤白肉際",
+    "notes": "脾の原穴、脾経の兪土穴"
+  },
+  "公孫": {
+    "id": "SP4",
+    "reading": "こうそん",
+    "meridian": "足太陰脾経",
+    "location": "足内側、第１中足骨底内側の遠位陥凹部、赤白肉際",
+    "notes": "脾経の絡穴、八脈交会穴"
+  },
+  "商丘": {
+    "id": "SP5",
+    "reading": "しょうきゅう",
+    "meridian": "足太陰脾経",
+    "location": "足内側、内果の前下方、舟状骨粗面と内果尖の中央陥凹部",
+    "notes": "脾経の経金穴"
+  },
+  "三陰交": {
+    "id": "SP6",
+    "reading": "さんいんこう",
+    "meridian": "足太陰脾経",
+    "location": "下腿内側、脛骨内縁の後際、内果尖の上方3寸",
+    "notes": ""
+  },
+  "漏谷": {
+    "id": "SP7",
+    "reading": "ろうこく",
+    "meridian": "足太陰脾経",
+    "location": "下腿内側、脛骨内縁の後縁、内果尖の上方6寸",
+    "notes": ""
+  },
+  "地機": {
+    "id": "SP8",
+    "reading": "ちき",
+    "meridian": "足太陰脾経",
+    "location": "下腿内側、脛骨内縁の後際、陰稜泉の下方３寸",
+    "notes": "脾経の郄穴"
+  },
+  "陰陵泉": {
+    "id": "SP9",
+    "reading": "いんりょうせん",
+    "meridian": "足太陰脾経",
+    "location": "下腿内側、脛骨内側顆下縁と脛骨内縁が接する陥凹部",
+    "notes": "脾経の合水穴"
+  },
+  "血海": {
+    "id": "SP10",
+    "reading": "けっかい",
+    "meridian": "足太陰脾経",
+    "location": "大腿前内側、内側広筋隆起部、膝蓋骨底内端の上方2寸",
+    "notes": ""
+  },
+  "箕門": {
+    "id": "SP11",
+    "reading": "きもん",
+    "meridian": "足太陰脾経",
+    "location": "大腿内側、膝蓋骨底内端と衝門を結ぶ線上、衝門から3分の1",
+    "notes": ""
+  },
+  "衝門": {
+    "id": "SP12",
+    "reading": "しょうもん",
+    "meridian": "足太陰脾経",
+    "location": "鼠径部、鼠径溝、大腿動脈拍動部の外方",
+    "notes": ""
+  },
+  "府舎": {
+    "id": "SP13",
+    "reading": "ふしゃ",
+    "meridian": "足太陰脾経",
+    "location": "下腹部、臍中央の下方4寸3分、前正中線の外方４寸",
+    "notes": ""
+  },
+  "腹結": {
+    "id": "SP14",
+    "reading": "ふっけつ",
+    "meridian": "足太陰脾経",
+    "location": "下腹部、臍中央の下方1寸3分、前正中線の外方４寸",
+    "notes": ""
+  },
+  "大横": {
+    "id": "SP15",
+    "reading": "だいおう",
+    "meridian": "足太陰脾経",
+    "location": "上腹部、臍中央の外方４寸",
+    "notes": ""
+  },
+  "腹哀": {
+    "id": "SP16",
+    "reading": "ふくあい",
+    "meridian": "足太陰脾経",
+    "location": "上腹部、臍中央の上方3寸、前正中線の外方４寸",
+    "notes": ""
+  },
+  "食竇": {
+    "id": "SP17",
+    "reading": "しょくとく",
+    "meridian": "足太陰脾経",
+    "location": "前胸部、第5肋間、前正中線の外方６寸",
+    "notes": ""
+  },
+  "天渓": {
+    "id": "SP18",
+    "reading": "てんけい",
+    "meridian": "足太陰脾経",
+    "location": "前胸部、第4肋間、前正中線の外方６寸",
+    "notes": ""
+  },
+  "胸郷": {
+    "id": "SP19",
+    "reading": "きょうきょう",
+    "meridian": "足太陰脾経",
+    "location": "前胸部、第3肋間、前正中線の外方６寸",
+    "notes": ""
+  },
+  "周栄": {
+    "id": "SP20",
+    "reading": "しゅうえい",
+    "meridian": "足太陰脾経",
+    "location": "前胸部、第2肋間、前正中線の外方６寸",
+    "notes": ""
+  },
+  "大包": {
+    "id": "SP21",
+    "reading": "だいほう",
+    "meridian": "足太陰脾経",
+    "location": "側胸部、第6肋間、中腋窩線上",
+    "notes": "脾の大絡の絡穴"
+  },
+  "極泉": {
+    "id": "HT1",
+    "reading": "きょくせん",
+    "meridian": "手少陰心経",
+    "location": "腋窩、腋窩中央、腋窩動脈拍動部",
+    "notes": ""
+  },
+  "青霊": {
+    "id": "HT2",
+    "reading": "せいれい",
+    "meridian": "手少陰心経",
+    "location": "上腕内側面、上腕二頭筋の内側縁、肘窩横紋の上方３寸",
+    "notes": ""
+  },
+  "少海": {
+    "id": "HT3",
+    "reading": "しょうかい",
+    "meridian": "手少陰心経",
+    "location": "肘前内側、上腕骨内側上顆の前縁、肘窩横紋と同じ高さ",
+    "notes": "心経の合水穴"
+  },
+  "霊道": {
+    "id": "HT4",
+    "reading": "れいどう",
+    "meridian": "手少陰心経",
+    "location": "前腕前内側、尺側手根屈筋腱の橈側縁、手関節掌側横紋の上方1寸5分",
+    "notes": "心経の経金穴"
+  },
+  "通里": {
+    "id": "HT5",
+    "reading": "つうり",
+    "meridian": "手少陰心経",
+    "location": "前腕前内側、尺側手根屈筋腱の撓側縁、手関節掌側横紋の上方1寸",
+    "notes": "心経の絡穴"
+  },
+  "陰郄": {
+    "id": "HT6",
+    "reading": "いんげき",
+    "meridian": "手少陰心経",
+    "location": "前腕前内側、尺側手根屈筋腱の撓側縁、手関節掌側横紋の上方5分",
+    "notes": "心経の郄穴"
+  },
+  "神門": {
+    "id": "HT7",
+    "reading": "しんもん",
+    "meridian": "手少陰心経",
+    "location": "手関節前内側、尺側手根屈筋腱の撓側縁、手関節掌側横紋上",
+    "notes": "心の原穴、心経の兪土穴"
+  },
+  "少府": {
+    "id": "HT8",
+    "reading": "しょうふ",
+    "meridian": "手少陰心経",
+    "location": "手掌、第５中手指節関節の近位端と同じ高さ、第4・5中手骨の間",
+    "notes": "心経の栄火穴"
+  },
+  "少衝": {
+    "id": "HT9",
+    "reading": "しょうしょう",
+    "meridian": "手少陰心経",
+    "location": "小指、末節骨撓側、爪甲角の近位外方1分、爪甲橈側縁の垂線と爪甲基底部の水平線との交点",
+    "notes": "心経の井木穴"
+  },
+  "少沢": {
+    "id": "SI1",
+    "reading": "しょうたく",
+    "meridian": "手太陽小腸経",
+    "location": "小指、末節骨尺側、爪甲角の近位内方1分、爪甲尺側縁の垂線と爪甲基底部の水平線との交点",
+    "notes": "小腸経の井金穴"
+  },
+  "前谷": {
+    "id": "SI2",
+    "reading": "ぜんこく",
+    "meridian": "手太陽小腸経",
+    "location": "小指、第５中手指節関節尺側の遠位陥凹部、赤白肉際",
+    "notes": "小腸経の栄水穴"
+  },
+  "後渓": {
+    "id": "SI3",
+    "reading": "こうけい",
+    "meridian": "手太陽小腸経",
+    "location": "手背、第５中手指節関節尺側の近位陥凹部、赤白肉際",
+    "notes": "小腸経の兪木穴、八脈交会穴"
+  },
+  "腕骨": {
+    "id": "SI4",
+    "reading": "わんこつ",
+    "meridian": "手太陽小腸経",
+    "location": "手関節後内側、第５中手骨底部と三角骨の間の陥凹部、赤白肉際",
+    "notes": "小腸の原穴"
+  },
+  "陽谷": {
+    "id": "SI5",
+    "reading": "ようこく",
+    "meridian": "手太陽小腸経",
+    "location": "手関節後内側、三角骨と尺骨茎状突起の間の陥凹部",
+    "notes": "小腸経の経火穴"
+  },
+  "養老": {
+    "id": "SI6",
+    "reading": "ようろう",
+    "meridian": "手太陽小腸経",
+    "location": "前腕後内側、尺骨頭撓側の陥凹部、手関節背側横紋の上方1寸",
+    "notes": "小腸経の郄穴"
+  },
+  "支正": {
+    "id": "SI7",
+    "reading": "しせい",
+    "meridian": "手太陽小腸経",
+    "location": "前腕後内側、尺骨内縁と尺側手根屈筋の間、手関節背側横紋の上方5寸",
+    "notes": "小腸経の絡穴"
+  },
+  "小海": {
+    "id": "SI8",
+    "reading": "しょうかい",
+    "meridian": "手太陽小腸経",
+    "location": "肘後内側、肘頭と上腕骨内側上顆の間の陥凹部",
+    "notes": "小腸経の合土穴"
+  },
+  "肩貞": {
+    "id": "SI9",
+    "reading": "けんてい",
+    "meridian": "手太陽小腸経",
+    "location": "肩周囲部、肩関節の後下方、腋窩横紋後端から上方１寸",
+    "notes": ""
+  },
+  "臑兪": {
+    "id": "SI10",
+    "reading": "じゅゆ",
+    "meridian": "手太陽小腸経",
+    "location": "肩周囲部、腋窩横紋後端の上方、肩甲棘の下方陥凹部",
+    "notes": ""
+  },
+  "天宗": {
+    "id": "SI11",
+    "reading": "てんそう",
+    "meridian": "手太陽小腸経",
+    "location": "肩甲部、肩甲棘の中点と肩甲骨下角を結んだ線上、肩甲棘から3分の1にある陥凹部",
+    "notes": ""
+  },
+  "秉風": {
+    "id": "SI12",
+    "reading": "へいふう",
+    "meridian": "手太陽小腸経",
+    "location": "肩甲部、棘上窩、肩甲棘中点の上方",
+    "notes": ""
+  },
+  "曲垣": {
+    "id": "SI13",
+    "reading": "きょくえん",
+    "meridian": "手太陽小腸経",
+    "location": "肩甲部、肩甲棘内端の上方陥凹部",
+    "notes": ""
+  },
+  "肩外兪": {
+    "id": "SI14",
+    "reading": "けんがいゆ",
+    "meridian": "手太陽小腸経",
+    "location": "上背部、第１胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "肩中兪": {
+    "id": "SI15",
+    "reading": "けんちゅうゆ",
+    "meridian": "手太陽小腸経",
+    "location": "上背部、第７頚椎棘突起下縁と同じ高さ、後正中線の外方２寸",
+    "notes": ""
+  },
+  "天窓": {
+    "id": "SI16",
+    "reading": "てんそう",
+    "meridian": "手太陽小腸経",
+    "location": "前頸部、胸鎖乳突筋の後縁、甲状軟骨上縁と同じ高さ",
+    "notes": ""
+  },
+  "天容": {
+    "id": "SI17",
+    "reading": "てんよう",
+    "meridian": "手太陽小腸経",
+    "location": "前頸部、下顎角の後方、胸鎖乳突筋の前方陥凹部",
+    "notes": ""
+  },
+  "顴髎": {
+    "id": "SI18",
+    "reading": "けんりょう",
+    "meridian": "手太陽小腸経",
+    "location": "顔面部、外眼角の直下、頬骨下方の陥凹部",
+    "notes": ""
+  },
+  "聴宮": {
+    "id": "SI19",
+    "reading": "ちょうきゅう",
+    "meridian": "手太陽小腸経",
+    "location": "顔面部、耳珠中央の前縁と下顎骨関節突起の間の陥凹部",
+    "notes": ""
+  },
+  "睛明": {
+    "id": "BL1",
+    "reading": "せいめい",
+    "meridian": "足太陽膀胱経",
+    "location": "顔面部、内眼角の内上方と眼窩内側壁の間の陥凹部",
+    "notes": ""
+  },
+  "攅竹": {
+    "id": "BL2",
+    "reading": "さんちく",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、眉毛内端の陥凹部",
+    "notes": ""
+  },
+  "眉衝": {
+    "id": "BL3",
+    "reading": "びしょう",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、前頭切痕の上方、前髪際の後方５分",
+    "notes": ""
+  },
+  "曲差": {
+    "id": "BL4",
+    "reading": "きょくさ",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、前髪際の後方5分、前正中線の外方1寸5分",
+    "notes": ""
+  },
+  "五処": {
+    "id": "BL5",
+    "reading": "ごしょ",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、前髪際の後方1寸、前正中線の外方1寸5分",
+    "notes": ""
+  },
+  "承光": {
+    "id": "BL6",
+    "reading": "しょうこう",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、前髪際の後方2寸5分、前正中線の外方1寸5分",
+    "notes": ""
+  },
+  "通天": {
+    "id": "BL7",
+    "reading": "つうてん",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、前髪際の後方4寸、前正中線の外方1寸5分",
+    "notes": ""
+  },
+  "絡却": {
+    "id": "BL8",
+    "reading": "らっきゃく",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、前髪際の後方5寸5分、後正中線の外方1寸5分",
+    "notes": ""
+  },
+  "玉枕": {
+    "id": "BL9",
+    "reading": "ぎょくちん",
+    "meridian": "足太陽膀胱経",
+    "location": "頭部、外後頭隆起上縁と同じ高さ、後正中線の外方1寸3分",
+    "notes": ""
+  },
+  "天柱": {
+    "id": "BL10",
+    "reading": "てんちゅう",
+    "meridian": "足太陽膀胱経",
+    "location": "後頭部、第2頚椎棘突起上縁と同じ高さ、僧帽筋外縁の陥凹部",
+    "notes": ""
+  },
+  "大杼": {
+    "id": "BL11",
+    "reading": "だいじょ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第1胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "八会穴の骨会"
+  },
+  "風門": {
+    "id": "BL12",
+    "reading": "ふうもん",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第2胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": ""
+  },
+  "肺兪": {
+    "id": "BL13",
+    "reading": "はいゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第3胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "肺の背部兪穴"
+  },
+  "厥陰兪": {
+    "id": "BL14",
+    "reading": "けついんゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第4胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "心包の背部兪穴"
+  },
+  "心兪": {
+    "id": "BL15",
+    "reading": "しんゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第5胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "心の背部兪穴"
+  },
+  "督兪": {
+    "id": "BL16",
+    "reading": "とくゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第6胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": ""
+  },
+  "膈兪": {
+    "id": "BL17",
+    "reading": "かくゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第7胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "八会穴の血会"
+  },
+  "肝兪": {
+    "id": "BL18",
+    "reading": "かんゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第9胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "肝の背部兪穴"
+  },
+  "胆兪": {
+    "id": "BL19",
+    "reading": "たんゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第10胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "胆の背部兪穴"
+  },
+  "脾兪": {
+    "id": "BL20",
+    "reading": "ひゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第11胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "脾の背部兪穴"
+  },
+  "胃兪": {
+    "id": "BL21",
+    "reading": "いゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第12胸椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "胃の背部兪穴"
+  },
+  "三焦兪": {
+    "id": "BL22",
+    "reading": "さんしょうゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "腰部、第1腰椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "三焦の背部兪穴"
+  },
+  "腎兪": {
+    "id": "BL23",
+    "reading": "じんゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "腰部、第2腰椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "腎の背部兪穴"
+  },
+  "気海兪": {
+    "id": "BL24",
+    "reading": "きかいゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "腰部、第3腰椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": ""
+  },
+  "大腸兪": {
+    "id": "BL25",
+    "reading": "だいちょうゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "腰部、第4腰椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": "大腸の背部兪穴"
+  },
+  "関元兪": {
+    "id": "BL26",
+    "reading": "かんげんゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "腰部、第5腰椎棘突起下縁と同じ高さ、後正中線の外方１寸５分",
+    "notes": ""
+  },
+  "小腸兪": {
+    "id": "BL27",
+    "reading": "しょうちょうゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第1後仙骨孔と同じ高さ、正中仙骨稜の外方１寸５分",
+    "notes": "小腸の背部兪穴"
+  },
+  "膀胱兪": {
+    "id": "BL28",
+    "reading": "ぼうこうゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第2後仙骨孔と同じ高さ、正中仙骨稜の外方１寸５分",
+    "notes": "膀胱の背部兪穴"
+  },
+  "中膂兪": {
+    "id": "BL29",
+    "reading": "ちゅうりょゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第3後仙骨孔と同じ高さ、正中仙骨稜の外方１寸５分",
+    "notes": ""
+  },
+  "白環兪": {
+    "id": "BL30",
+    "reading": "はっかんゆ",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第4後仙骨孔と同じ高さ、正中仙骨稜の外方１寸５分",
+    "notes": ""
+  },
+  "上髎": {
+    "id": "BL31",
+    "reading": "じょうりょう",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第1後仙骨孔",
+    "notes": ""
+  },
+  "次髎": {
+    "id": "BL32",
+    "reading": "じりょう",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第2後仙骨孔",
+    "notes": ""
+  },
+  "中髎": {
+    "id": "BL33",
+    "reading": "ちゅうりょう",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第3後仙骨孔",
+    "notes": ""
+  },
+  "下髎": {
+    "id": "BL34",
+    "reading": "げりょう",
+    "meridian": "足太陽膀胱経",
+    "location": "仙骨部、第4後仙骨孔",
+    "notes": ""
+  },
+  "会陽": {
+    "id": "BL35",
+    "reading": "えよう",
+    "meridian": "足太陽膀胱経",
+    "location": "殿部、尾骨下端外方５分",
+    "notes": ""
+  },
+  "承扶": {
+    "id": "BL36",
+    "reading": "しょうふ",
+    "meridian": "足太陽膀胱経",
+    "location": "殿部、殿溝の中点",
+    "notes": ""
+  },
+  "殷門": {
+    "id": "BL37",
+    "reading": "いんもん",
+    "meridian": "足太陽膀胱経",
+    "location": "大腿部後面、大腿二頭筋と半腱様筋の間、殿溝の下方6寸",
+    "notes": ""
+  },
+  "浮郄": {
+    "id": "BL38",
+    "reading": "ふげき",
+    "meridian": "足太陽膀胱経",
+    "location": "膝後面、大腿二頭筋の内縁、膝窩横紋の上方1寸",
+    "notes": ""
+  },
+  "委陽": {
+    "id": "BL39",
+    "reading": "いよう",
+    "meridian": "足太陽膀胱経",
+    "location": "膝後外側、大腿二頭筋腱の内縁、膝窩横紋上",
+    "notes": "三焦の下合穴"
+  },
+  "委中": {
+    "id": "BL40",
+    "reading": "いちゅう",
+    "meridian": "足太陽膀胱経",
+    "location": "膝後面、膝窩横紋の中点",
+    "notes": "膀胱経の合土穴、四総穴、膀胱の下合穴"
+  },
+  "附分": {
+    "id": "BL41",
+    "reading": "ふぶん",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第２胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "魄戸": {
+    "id": "BL42",
+    "reading": "はくこ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第3胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "膏肓": {
+    "id": "BL43",
+    "reading": "こうこう",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第4胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "神堂": {
+    "id": "BL44",
+    "reading": "しんどう",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第5胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "譩譆": {
+    "id": "BL45",
+    "reading": "いき",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第6胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "膈関": {
+    "id": "BL46",
+    "reading": "かくかん",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第7胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "魂門": {
+    "id": "BL47",
+    "reading": "こんもん",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第9胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "陽綱": {
+    "id": "BL48",
+    "reading": "ようこう",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第10胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "意舎": {
+    "id": "BL49",
+    "reading": "いしゃ",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第11胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "胃倉": {
+    "id": "BL50",
+    "reading": "いそう",
+    "meridian": "足太陽膀胱経",
+    "location": "上背部、第12胸椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "肓門": {
+    "id": "BL51",
+    "reading": "こうもん",
+    "meridian": "足太陽膀胱経",
+    "location": "腰部、第1腰椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "志室": {
+    "id": "BL52",
+    "reading": "ししつ",
+    "meridian": "足太陽膀胱経",
+    "location": "腰部、第2腰椎棘突起下縁と同じ高さ、後正中線の外方３寸",
+    "notes": ""
+  },
+  "胞肓": {
+    "id": "BL53",
+    "reading": "ほうこう",
+    "meridian": "足太陽膀胱経",
+    "location": "殿部、第２仙骨孔と同じ高さ、正中仙骨稜の外方３寸",
+    "notes": ""
+  },
+  "秩辺": {
+    "id": "BL54",
+    "reading": "ちっぺん",
+    "meridian": "足太陽膀胱経",
+    "location": "殿部、第4仙骨孔と同じ高さ、正中仙骨稜の外方３寸",
+    "notes": ""
+  },
+  "合陽": {
+    "id": "BL55",
+    "reading": "ごうよう",
+    "meridian": "足太陽膀胱経",
+    "location": "下腿後面、腓腹筋外側頭と内側頭の間、膝窩横紋の下方2寸",
+    "notes": ""
+  },
+  "承筋": {
+    "id": "BL56",
+    "reading": "しょうきん",
+    "meridian": "足太陽膀胱経",
+    "location": "下腿後面、腓腹筋の両筋腹の間、膝窩横紋の下方5寸",
+    "notes": ""
+  },
+  "承山": {
+    "id": "BL57",
+    "reading": "しょうざん",
+    "meridian": "足太陽膀胱経",
+    "location": "下腿後面、腓腹筋筋腹とアキレス腱の移行部",
+    "notes": ""
+  },
+  "飛揚": {
+    "id": "BL58",
+    "reading": "ひよう",
+    "meridian": "足太陽膀胱経",
+    "location": "下腿後外側、腓腹筋外側頭下縁とアキレス腱の間、崑崙の上方７寸",
+    "notes": "膀胱経の絡穴"
+  },
+  "跗陽": {
+    "id": "BL59",
+    "reading": "ふよう",
+    "meridian": "足太陽膀胱経",
+    "location": "下腿後外側、腓骨とアキレス腱の間、崑崙の上方３寸",
+    "notes": "陽蹻脈の郄穴"
+  },
+  "崑崙": {
+    "id": "BL60",
+    "reading": "こんろん",
+    "meridian": "足太陽膀胱経",
+    "location": "足関節後外側、外果尖とアキレス腱の間の陥凹部",
+    "notes": "膀胱経の経火穴"
+  },
+  "僕参": {
+    "id": "BL61",
+    "reading": "ぼくしん",
+    "meridian": "足太陽膀胱経",
+    "location": "足外側、崑崙の下方、踵骨外側、赤白肉際",
+    "notes": ""
+  },
+  "申脈": {
+    "id": "BL62",
+    "reading": "しんみゃく",
+    "meridian": "足太陽膀胱経",
+    "location": "足外側、外果尖の直下、外果下縁と踵骨の間の陥凹部",
+    "notes": "八脈交会穴"
+  },
+  "金門": {
+    "id": "BL63",
+    "reading": "きんもん",
+    "meridian": "足太陽膀胱経",
+    "location": "足背、外側前縁の遠位、第5中足骨粗面の後方、立方骨下方の陥凹部",
+    "notes": "膀胱経の郄穴"
+  },
+  "京骨": {
+    "id": "BL64",
+    "reading": "けいこつ",
+    "meridian": "足太陽膀胱経",
+    "location": "足背、第5中足骨粗面の遠位、赤白肉際",
+    "notes": "膀胱の原穴"
+  },
+  "束骨": {
+    "id": "BL65",
+    "reading": "そっこつ",
+    "meridian": "足太陽膀胱経",
+    "location": "足背、第5中足指節関節外側の近位陥凹部、赤白肉際",
+    "notes": "膀胱経の兪木穴"
+  },
+  "足通谷": {
+    "id": "BL66",
+    "reading": "あしつうこく",
+    "meridian": "足太陽膀胱経",
+    "location": "足の第5指、第5中足指節関節外側の遠位陥凹部、赤白肉際",
+    "notes": "膀胱経の栄水穴"
+  },
+  "至陰": {
+    "id": "BL67",
+    "reading": "しいん",
+    "meridian": "足太陽膀胱経",
+    "location": "足の第５指、末節骨外側、爪甲角の近位外方1寸、爪甲外側縁の垂線と爪甲基底部の水平線の交点",
+    "notes": "膀胱経の井金穴"
+  },
+  "湧泉": {
+    "id": "KI1",
+    "reading": "ゆうせん",
+    "meridian": "足少陰腎経",
+    "location": "足底、足指屈曲時、足底の最陥凹部",
+    "notes": "腎経の井木穴"
+  },
+  "然谷": {
+    "id": "KI2",
+    "reading": "ねんこく",
+    "meridian": "足少陰腎経",
+    "location": "足内側、舟状骨粗面の下方、赤白肉際",
+    "notes": "腎経の栄火穴"
+  },
+  "太渓": {
+    "id": "KI3",
+    "reading": "たいけい",
+    "meridian": "足少陰腎経",
+    "location": "足関節後内側、内果尖とアキレス腱の陥凹部",
+    "notes": "腎の原穴、腎経の兪土穴"
+  },
+  "大鐘": {
+    "id": "KI4",
+    "reading": "たいしょう",
+    "meridian": "足少陰腎経",
+    "location": "足内側、内果後下方、踵骨上方、アキレス腱付着部内側前方の陥凹部",
+    "notes": "腎経の絡穴"
+  },
+  "水泉": {
+    "id": "KI5",
+    "reading": "すいせん",
+    "meridian": "足少陰腎経",
+    "location": "足内側、太渓の下方１寸、踵骨隆起前方の陥凹部",
+    "notes": "腎経の郄穴"
+  },
+  "照海": {
+    "id": "KI6",
+    "reading": "しょうかい",
+    "meridian": "足少陰腎経",
+    "location": "足内側、内果尖の下方１寸、内果下方の陥凹部",
+    "notes": "八脈交会穴"
+  },
+  "復溜": {
+    "id": "KI7",
+    "reading": "ふくりゅう",
+    "meridian": "足少陰腎経",
+    "location": "下腿後内側、アキレス腱の前縁、内果尖の上方2寸",
+    "notes": "腎経の経金穴"
+  },
+  "交信": {
+    "id": "KI8",
+    "reading": "こうしん",
+    "meridian": "足少陰腎経",
+    "location": "下腿内側、脛骨内縁の後方の陥凹部、内果尖の上方2寸",
+    "notes": "陰蹻脈の郄穴"
+  },
+  "築賓": {
+    "id": "KI9",
+    "reading": "ちくひん",
+    "meridian": "足少陰腎経",
+    "location": "下腿後内側、ヒラメ筋とアキレス腱の間、内果尖の上方５寸",
+    "notes": "陰維脈の郄穴"
+  },
+  "陰谷": {
+    "id": "KI10",
+    "reading": "いんこく",
+    "meridian": "足少陰腎経",
+    "location": "膝後内側、半腱様筋腱の外縁、膝窩横紋上",
+    "notes": "腎経の合水穴"
+  },
+  "横骨": {
+    "id": "KI11",
+    "reading": "おうこつ",
+    "meridian": "足少陰腎経",
+    "location": "下腹部、臍中央の下方５寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "大赫": {
+    "id": "KI12",
+    "reading": "だいかく",
+    "meridian": "足少陰腎経",
+    "location": "下腹部、臍中央の下方4寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "気穴": {
+    "id": "KI13",
+    "reading": "きけつ",
+    "meridian": "足少陰腎経",
+    "location": "下腹部、臍中央の下方3寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "四満": {
+    "id": "KI14",
+    "reading": "しまん",
+    "meridian": "足少陰腎経",
+    "location": "下腹部、臍中央の下方2寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "中注": {
+    "id": "KI15",
+    "reading": "ちゅうちゅう",
+    "meridian": "足少陰腎経",
+    "location": "下腹部、臍中央の下方1寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "肓兪": {
+    "id": "KI16",
+    "reading": "こうゆ",
+    "meridian": "足少陰腎経",
+    "location": "上腹部、臍中央の外方５分",
+    "notes": ""
+  },
+  "商曲": {
+    "id": "KI17",
+    "reading": "しょうきょく",
+    "meridian": "足少陰腎経",
+    "location": "上腹部、臍中央の上方2寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "石関": {
+    "id": "KI18",
+    "reading": "せきかん",
+    "meridian": "足少陰腎経",
+    "location": "上腹部、臍中央の上方3寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "陰都": {
+    "id": "KI19",
+    "reading": "いんと",
+    "meridian": "足少陰腎経",
+    "location": "上腹部、臍中央の上方4寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "腹通谷": {
+    "id": "KI20",
+    "reading": "はらつうこく",
+    "meridian": "足少陰腎経",
+    "location": "上腹部、臍中央の上方5寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "幽門": {
+    "id": "KI21",
+    "reading": "ゆうもん",
+    "meridian": "足少陰腎経",
+    "location": "上腹部、臍中央の上方6寸、前正中線の外方5分",
+    "notes": ""
+  },
+  "歩廊": {
+    "id": "KI22",
+    "reading": "ほろう",
+    "meridian": "足少陰腎経",
+    "location": "前胸部、第５肋間、前正中線の外方2寸",
+    "notes": ""
+  },
+  "神封": {
+    "id": "KI23",
+    "reading": "しんぽう",
+    "meridian": "足少陰腎経",
+    "location": "前胸部、第4肋間、前正中線の外方2寸",
+    "notes": ""
+  },
+  "霊墟": {
+    "id": "KI24",
+    "reading": "れいきょ",
+    "meridian": "足少陰腎経",
+    "location": "前胸部、第3肋間、前正中線の外方2寸",
+    "notes": ""
+  },
+  "神蔵": {
+    "id": "KI25",
+    "reading": "しんぞう",
+    "meridian": "足少陰腎経",
+    "location": "前胸部、第2肋間、前正中線の外方2寸",
+    "notes": ""
+  },
+  "彧中": {
+    "id": "KI26",
+    "reading": "いくちゅう",
+    "meridian": "足少陰腎経",
+    "location": "前胸部、第1肋間、前正中線の外方2寸",
+    "notes": ""
+  },
+  "兪府": {
+    "id": "KI27",
+    "reading": "ゆふ",
+    "meridian": "足少陰腎経",
+    "location": "前胸部、鎖骨下縁、前正中線の外方２寸",
+    "notes": ""
+  },
+  "天池": {
+    "id": "PC1",
+    "reading": "てんち",
+    "meridian": "手厥陰心包経",
+    "location": "前胸部、第4肋間、前正中線の外方5寸",
+    "notes": ""
+  },
+  "天泉": {
+    "id": "PC2",
+    "reading": "てんせん",
+    "meridian": "手厥陰心包経",
+    "location": "上腕前面、上腕二頭筋長頭と短頭の間、腋窩横紋前端の下方2寸",
+    "notes": ""
+  },
+  "曲沢": {
+    "id": "PC3",
+    "reading": "きょくたく",
+    "meridian": "手厥陰心包経",
+    "location": "肘前面、肘窩横紋上、上腕二頭筋腱内方の陥凹部",
+    "notes": "心包経の合水穴"
+  },
+  "郄門": {
+    "id": "PC4",
+    "reading": "げきもん",
+    "meridian": "手厥陰心包経",
+    "location": "前腕前面、長掌筋腱と橈側手根屈筋腱の間、手関節掌側横紋の上方5寸",
+    "notes": "心包経の郄穴"
+  },
+  "間使": {
+    "id": "PC5",
+    "reading": "かんし",
+    "meridian": "手厥陰心包経",
+    "location": "前腕前面、長掌筋腱と橈側手根屈筋腱の間、手関節掌側横紋の上方3寸",
+    "notes": "心包経の経金穴"
+  },
+  "内関": {
+    "id": "PC6",
+    "reading": "ないかん",
+    "meridian": "手厥陰心包経",
+    "location": "前腕前面、長掌筋腱と橈側手根屈筋腱の間、手関節掌側横紋の上方2寸",
+    "notes": "心包経の絡穴、八脈交会穴"
+  },
+  "大陵": {
+    "id": "PC7",
+    "reading": "だいりょう",
+    "meridian": "手厥陰心包経",
+    "location": "手関節前面、長掌筋腱と撓側手根屈筋腱の間、手関節掌側横紋上",
+    "notes": "心包の原穴、心包経の兪土穴"
+  },
+  "労宮": {
+    "id": "PC8",
+    "reading": "ろうきゅう",
+    "meridian": "手厥陰心包経",
+    "location": "手掌、第2・3中手骨間、中手指節関節の近位陥凹部",
+    "notes": "心包経の栄火穴"
+  },
+  "中衝": {
+    "id": "PC9",
+    "reading": "ちゅうしょう",
+    "meridian": "手厥陰心包経",
+    "location": "中指、中指先端の中央",
+    "notes": "心包経の井木穴"
+  },
+  "関衝": {
+    "id": "TE1",
+    "reading": "かんしょう",
+    "meridian": "手少陽三焦経",
+    "location": "薬指、末節骨尺側、爪甲角と近位内方1分、爪甲尺側縁の垂線と爪甲基底部の水平線との交点",
+    "notes": "三焦経の井金穴"
+  },
+  "液門": {
+    "id": "TE2",
+    "reading": "えきもん",
+    "meridian": "手少陽三焦経",
+    "location": "手背、薬指と小指の間、みずかきの近位陥凹部、赤白肉際",
+    "notes": "三焦経の栄水穴"
+  },
+  "中渚": {
+    "id": "TE3",
+    "reading": "ちゅうしょ",
+    "meridian": "手少陽三焦経",
+    "location": "手背、第4・第5中手骨間、第4中手指節関節の近位陥凹部",
+    "notes": "三焦経の兪木穴"
+  },
+  "陽池": {
+    "id": "TE4",
+    "reading": "ようち",
+    "meridian": "手少陽三焦経",
+    "location": "手関節後面、総指伸筋腱の尺側陥凹部、手関節背側横紋上",
+    "notes": "三焦の原穴"
+  },
+  "外関": {
+    "id": "TE5",
+    "reading": "がいかん",
+    "meridian": "手少陽三焦経",
+    "location": "前腕後面、橈骨と尺骨の骨間の中点、手関節背側横紋の上方2寸",
+    "notes": "三焦経の絡穴、八脈交会穴"
+  },
+  "支溝": {
+    "id": "TE6",
+    "reading": "しこう",
+    "meridian": "手少陽三焦経",
+    "location": "前腕後面、橈骨と尺骨の骨間の中点、手関節背側横紋の上方3寸",
+    "notes": "三焦経の経火穴"
+  },
+  "会宗": {
+    "id": "TE7",
+    "reading": "えそう",
+    "meridian": "手少陽三焦経",
+    "location": "前腕後面、尺骨の撓側縁、手関節背側横紋の上方3寸",
+    "notes": "三焦経の郄穴"
+  },
+  "三陽絡": {
+    "id": "TE8",
+    "reading": "さんようらく",
+    "meridian": "手少陽三焦経",
+    "location": "前腕後面、撓骨と尺骨の骨間の中点、手関節背側横紋の上方4寸",
+    "notes": ""
+  },
+  "四瀆": {
+    "id": "TE9",
+    "reading": "しとく",
+    "meridian": "手少陽三焦経",
+    "location": "前腕後面、撓骨と尺骨の骨間の中点、肘頭の下方5寸",
+    "notes": ""
+  },
+  "天井": {
+    "id": "TE10",
+    "reading": "てんせい",
+    "meridian": "手少陽三焦経",
+    "location": "肘後面、肘頭の上方１寸、陥凹部",
+    "notes": "三焦経の合土穴"
+  },
+  "清冷淵": {
+    "id": "TE11",
+    "reading": "せいれいえん",
+    "meridian": "手少陽三焦経",
+    "location": "上腕後面、肘頭と肩峰角を結ぶ線上、肘頭の上方2寸",
+    "notes": ""
+  },
+  "消濼": {
+    "id": "TE12",
+    "reading": "しょうれき",
+    "meridian": "手少陽三焦経",
+    "location": "上腕後面、肘頭と肩峰角を結ぶ線上、肘頭の上方5寸",
+    "notes": ""
+  },
+  "臑会": {
+    "id": "TE13",
+    "reading": "じゅえ",
+    "meridian": "手少陽三焦経",
+    "location": "上腕後面、三角筋の後下縁、肩峰の下方３寸",
+    "notes": ""
+  },
+  "肩髎": {
+    "id": "TE14",
+    "reading": "けんりょう",
+    "meridian": "手少陽三焦経",
+    "location": "肩周囲部、肩峰角と上腕骨大結節の間の陥凹部",
+    "notes": ""
+  },
+  "天髎": {
+    "id": "TE15",
+    "reading": "てんりょう",
+    "meridian": "手少陽三焦経",
+    "location": "肩甲部、肩甲骨上角の上方陥凹部",
+    "notes": ""
+  },
+  "天牖": {
+    "id": "TE16",
+    "reading": "てんゆう",
+    "meridian": "手少陽三焦経",
+    "location": "前頸部、下顎角と同じ高さ、胸鎖乳突筋後方の陥凹部",
+    "notes": ""
+  },
+  "翳風": {
+    "id": "TE17",
+    "reading": "えいふう",
+    "meridian": "手少陽三焦経",
+    "location": "前頸部、耳垂後方、乳様突起下端前方の陥凹部",
+    "notes": ""
+  },
+  "瘛脈": {
+    "id": "TE18",
+    "reading": "けいみゃく",
+    "meridian": "手少陽三焦経",
+    "location": "頭部、乳様突起の中央、翳風と角孫を結ぶ曲線上、翳風から3分の1",
+    "notes": ""
+  },
+  "顱息": {
+    "id": "TE19",
+    "reading": "ろそく",
+    "meridian": "手少陽三焦経",
+    "location": "頭部、乳様突起の中央、翳風と角孫を結ぶ曲線上、翳風から3分の2",
+    "notes": ""
+  },
+  "角孫": {
+    "id": "TE20",
+    "reading": "かくそん",
+    "meridian": "手少陽三焦経",
+    "location": "頭部、耳尖の当たるところ",
+    "notes": ""
+  },
+  "耳門": {
+    "id": "TE21",
+    "reading": "じもん",
+    "meridian": "手少陽三焦経",
+    "location": "顔面部、耳珠上の切痕と下顎骨の関節突起の間、陥凹部",
+    "notes": ""
+  },
+  "和髎": {
+    "id": "TE22",
+    "reading": "わりょう",
+    "meridian": "手少陽三焦経",
+    "location": "頭部、もみあげの後方、耳介の付け根の前方、浅側頭動脈の後方",
+    "notes": ""
+  },
+  "糸竹空": {
+    "id": "TE23",
+    "reading": "しちくくう",
+    "meridian": "手少陽三焦経",
+    "location": "頭部、眉毛外端の陥凹部",
+    "notes": ""
+  },
+  "瞳子髎": {
+    "id": "GB1",
+    "reading": "どうしりょう",
+    "meridian": "足少陽胆経",
+    "location": "頭部、外眼角の外方５分、陥凹部",
+    "notes": ""
+  },
+  "聴会": {
+    "id": "GB2",
+    "reading": "ちょうえ",
+    "meridian": "足少陽胆経",
+    "location": "顔面部、珠間切痕と下顎骨関節突起の間、陥凹部",
+    "notes": ""
+  },
+  "上関": {
+    "id": "GB3",
+    "reading": "じょうかん",
+    "meridian": "足少陽胆経",
+    "location": "頭部、頬骨弓中央の上際陥凹部",
+    "notes": ""
+  },
+  "頷厭": {
+    "id": "GB4",
+    "reading": "がんえん",
+    "meridian": "足少陽胆経",
+    "location": "頭部、頭維から曲鬢を結ぶ曲線上で頭維から４分の１",
+    "notes": ""
+  },
+  "懸顱": {
+    "id": "GB5",
+    "reading": "けんろ",
+    "meridian": "足少陽胆経",
+    "location": "頭部、頭維から曲鬢を結ぶ曲線上の中点",
+    "notes": ""
+  },
+  "懸釐": {
+    "id": "GB6",
+    "reading": "けんり",
+    "meridian": "足少陽胆経",
+    "location": "頭部、頭維から曲鬢を結ぶ曲線上、頭維から4分の3",
+    "notes": ""
+  },
+  "曲鬢": {
+    "id": "GB7",
+    "reading": "きょくびん",
+    "meridian": "足少陽胆経",
+    "location": "頭部、もみあげ後縁の垂線と耳尖の水平線の交点",
+    "notes": ""
+  },
+  "率谷": {
+    "id": "GB8",
+    "reading": "そっこく",
+    "meridian": "足少陽胆経",
+    "location": "頭部、耳尖の直上、髪際の上方1寸5分",
+    "notes": ""
+  },
+  "天衝": {
+    "id": "GB9",
+    "reading": "てんしょう",
+    "meridian": "足少陽胆経",
+    "location": "頭部、耳介の付け根の後縁の直上、髪際の上方2寸",
+    "notes": ""
+  },
+  "浮白": {
+    "id": "GB10",
+    "reading": "ふはく",
+    "meridian": "足少陽胆経",
+    "location": "頭部、乳様突起の後上方、天衝と完骨を結ぶ曲線上、天衝から3分の1",
+    "notes": ""
+  },
+  "頭竅陰": {
+    "id": "GB11",
+    "reading": "あたまきょういん",
+    "meridian": "足少陽胆経",
+    "location": "頭部、乳様突起の後上方、天衝と完骨を結ぶ曲線上、天衝から3分の2",
+    "notes": ""
+  },
+  "完骨": {
+    "id": "GB12",
+    "reading": "かんこつ",
+    "meridian": "足少陽胆経",
+    "location": "前頚部、乳様突起の後下方、陥凹部",
+    "notes": ""
+  },
+  "本神": {
+    "id": "GB13",
+    "reading": "ほんじん",
+    "meridian": "足少陽胆経",
+    "location": "頭部、前髪際の後方5分、前正中線の外方3寸",
+    "notes": ""
+  },
+  "陽白": {
+    "id": "GB14",
+    "reading": "ようはく",
+    "meridian": "足少陽胆経",
+    "location": "頭部、眉の上方1寸、瞳孔線上",
+    "notes": ""
+  },
+  "頭臨泣": {
+    "id": "GB15",
+    "reading": "あたまりんきゅう",
+    "meridian": "足少陽胆経",
+    "location": "頭部、前髪際から入ること5分、瞳孔線上",
+    "notes": ""
+  },
+  "目窓": {
+    "id": "GB16",
+    "reading": "もくそう",
+    "meridian": "足少陽胆経",
+    "location": "頭部、前髪際から入ること1寸5分、瞳孔線上",
+    "notes": ""
+  },
+  "正営": {
+    "id": "GB17",
+    "reading": "しょうえい",
+    "meridian": "足少陽胆経",
+    "location": "頭部、前髪際から入ること2寸5分、瞳孔線上",
+    "notes": ""
+  },
+  "承霊": {
+    "id": "GB18",
+    "reading": "しょうれい",
+    "meridian": "足少陽胆経",
+    "location": "頭部、前髪際から入ること4寸、瞳孔線上",
+    "notes": ""
+  },
+  "脳空": {
+    "id": "GB19",
+    "reading": "のうくう",
+    "meridian": "足少陽胆経",
+    "location": "頭部、外後頭隆起上縁と同じ高さ、風池の直上",
+    "notes": ""
+  },
+  "風池": {
+    "id": "GB20",
+    "reading": "ふうち",
+    "meridian": "足少陽胆経",
+    "location": "前頸部、後頭骨の下方、胸鎖乳突筋と僧帽筋の起始部の間、陥凹部",
+    "notes": ""
+  },
+  "肩井": {
+    "id": "GB21",
+    "reading": "けんせい",
+    "meridian": "足少陽胆経",
+    "location": "後頸部、第7頸椎棘突起と肩峰外縁を結ぶ線上の中点",
+    "notes": ""
+  },
+  "淵腋": {
+    "id": "GB22",
+    "reading": "えんえき",
+    "meridian": "足少陽胆経",
+    "location": "側胸部、第4肋間、中腋窩線上",
+    "notes": ""
+  },
+  "輒筋": {
+    "id": "GB23",
+    "reading": "ちょうきん",
+    "meridian": "足少陽胆経",
+    "location": "側胸部、第4肋間、中腋窩線の前方1寸",
+    "notes": ""
+  },
+  "日月": {
+    "id": "GB24",
+    "reading": "じつげつ",
+    "meridian": "足少陽胆経",
+    "location": "前胸部、第7肋間、前正中線の外方4寸",
+    "notes": "胆の募穴"
+  },
+  "京門": {
+    "id": "GB25",
+    "reading": "けいもん",
+    "meridian": "足少陽胆経",
+    "location": "側腹部、第12肋骨前端下縁",
+    "notes": "腎の募穴"
+  },
+  "帯脈": {
+    "id": "GB26",
+    "reading": "たいみゃく",
+    "meridian": "足少陽胆経",
+    "location": "側腹部、第11肋骨端下方、臍中央と同じ高さ",
+    "notes": ""
+  },
+  "五枢": {
+    "id": "GB27",
+    "reading": "ごすう",
+    "meridian": "足少陽胆経",
+    "location": "下腹部、臍中央の下方3寸、上前腸骨棘の内方",
+    "notes": ""
+  },
+  "維道": {
+    "id": "GB28",
+    "reading": "いどう",
+    "meridian": "足少陽胆経",
+    "location": "下腹部、上前腸骨棘の内下方5分",
+    "notes": ""
+  },
+  "居髎": {
+    "id": "GB29",
+    "reading": "きょりょう",
+    "meridian": "足少陽胆経",
+    "location": "殿部、上前腸骨棘と大転子頂点の中点",
+    "notes": ""
+  },
+  "環跳": {
+    "id": "GB30",
+    "reading": "かんちょう",
+    "meridian": "足少陽胆経",
+    "location": "殿部、大転子の頂点と仙骨裂孔を結ぶ線上、大転子頂点から３分の１",
+    "notes": ""
+  },
+  "風市": {
+    "id": "GB31",
+    "reading": "ふうし",
+    "meridian": "足少陽胆経",
+    "location": "大腿部外側、直立して腕を下垂し、手掌を大腿部に付けた時、中指の先端があたる腸脛靱帯の後方陥凹部",
+    "notes": ""
+  },
+  "中瀆": {
+    "id": "GB32",
+    "reading": "ちゅうとく",
+    "meridian": "足少陽胆経",
+    "location": "大腿部外側、腸脛靭帯の後方で、膝窩横紋の上方７寸",
+    "notes": ""
+  },
+  "膝陽関": {
+    "id": "GB33",
+    "reading": "ひざようかん",
+    "meridian": "足少陽胆経",
+    "location": "膝外側、大腿二頭筋腱と腸脛靱帯の間の陥凹部、大腿骨外側上顆の後上縁",
+    "notes": ""
+  },
+  "陽陵泉": {
+    "id": "GB34",
+    "reading": "ようりょうせん",
+    "meridian": "足少陽胆経",
+    "location": "下腿外側、腓骨頭前下方の陥凹部",
+    "notes": "胆経の合土穴、八会穴の筋会、胆の下合穴"
+  },
+  "陽交": {
+    "id": "GB35",
+    "reading": "ようこう",
+    "meridian": "足少陽胆経",
+    "location": "下腿外側、腓骨の後方、外果尖の上方７寸",
+    "notes": "陽維脈の郄穴"
+  },
+  "外丘": {
+    "id": "GB36",
+    "reading": "がいきゅう",
+    "meridian": "足少陽胆経",
+    "location": "下腿外側、腓骨の前方、外果尖の上方７寸",
+    "notes": "胆経の郄穴"
+  },
+  "光明": {
+    "id": "GB37",
+    "reading": "こうめい",
+    "meridian": "足少陽胆経",
+    "location": "下腿外側、腓骨の前方、外果尖の上方5寸",
+    "notes": "胆経の絡穴"
+  },
+  "陽輔": {
+    "id": "GB38",
+    "reading": "ようほ",
+    "meridian": "足少陽胆経",
+    "location": "下腿外側、腓骨の前方、外果尖の上方4寸",
+    "notes": "胆経の経火穴"
+  },
+  "懸鐘": {
+    "id": "GB39",
+    "reading": "けんしょう",
+    "meridian": "足少陽胆経",
+    "location": "下腿外側、腓骨の前方、外果尖の上方3寸",
+    "notes": "八会穴の髄会"
+  },
+  "丘墟": {
+    "id": "GB40",
+    "reading": "きゅうきょ",
+    "meridian": "足少陽胆経",
+    "location": "足関節前外側、長指伸筋腱外側の陥凹部、外果尖の前下方",
+    "notes": "胆の原穴"
+  },
+  "足臨泣": {
+    "id": "GB41",
+    "reading": "あしりんきゅう",
+    "meridian": "足少陽胆経",
+    "location": "足背、第４・第５中足骨底接合部の遠位、第5指の長指伸筋腱外側の陥凹部",
+    "notes": "胆経の兪木穴、八脈交会穴"
+  },
+  "地五会": {
+    "id": "GB42",
+    "reading": "ちごえ",
+    "meridian": "足少陽胆経",
+    "location": "足背、第４・第５中足骨間、第4中足指節関節の近位陥凹部",
+    "notes": ""
+  },
+  "侠渓": {
+    "id": "GB43",
+    "reading": "きょうけい",
+    "meridian": "足少陽胆経",
+    "location": "足背、第４・第５中足骨間、みずかきの近位、赤白肉際",
+    "notes": "胆経の栄水穴"
+  },
+  "足竅陰": {
+    "id": "GB44",
+    "reading": "あしきょういん",
+    "meridian": "足少陽胆経",
+    "location": "足の第４指、末節骨外側、爪甲角の近位外方1分、爪甲外側縁の垂線と爪甲基底部の水平線との交点",
+    "notes": "胆経の井金穴"
+  },
+  "大敦": {
+    "id": "LR1",
+    "reading": "だいとん",
+    "meridian": "足厥陰肝経",
+    "location": "足の第１指、末節骨外側、爪甲角の近位外方1分、爪甲外側縁の垂線と爪甲基底部の水平線との交点",
+    "notes": "肝経の井木穴"
+  },
+  "行間": {
+    "id": "LR2",
+    "reading": "こうかん",
+    "meridian": "足厥陰肝経",
+    "location": "足背、第１・第2指間、みずかきの近位、赤白肉際",
+    "notes": "肝経の栄火穴"
+  },
+  "太衝": {
+    "id": "LR3",
+    "reading": "たいしょう",
+    "meridian": "足厥陰肝経",
+    "location": "足背、第１・２中足骨間、中足骨底接合部遠位の陥凹部、足背動脈拍動部",
+    "notes": "肝の原穴、肝経の兪土穴"
+  },
+  "中封": {
+    "id": "LR4",
+    "reading": "ちゅうほう",
+    "meridian": "足厥陰肝経",
+    "location": "足関節前内側、前脛骨筋腱内側の陥凹部、内果尖の前方",
+    "notes": "肝経の経金穴"
+  },
+  "蠡溝": {
+    "id": "LR5",
+    "reading": "れいこう",
+    "meridian": "足厥陰肝経",
+    "location": "下腿前内側、脛骨内側面の中央、内果の上方5寸",
+    "notes": "肝経の絡穴"
+  },
+  "中都": {
+    "id": "LR6",
+    "reading": "ちゅうと",
+    "meridian": "足厥陰肝経",
+    "location": "下腿前内側、脛骨内側面の中央、内果の上方7寸",
+    "notes": "肝経の郄穴"
+  },
+  "膝関": {
+    "id": "LR7",
+    "reading": "しつかん",
+    "meridian": "足厥陰肝経",
+    "location": "下腿脛骨面、脛骨内側顆の下方、陰陵泉の後方1寸",
+    "notes": ""
+  },
+  "曲泉": {
+    "id": "LR8",
+    "reading": "きょくせん",
+    "meridian": "足厥陰肝経",
+    "location": "膝内側、半腱様筋腱と半膜様筋腱内側の陥凹部、膝窩横紋の内側端",
+    "notes": "肝経の合水穴"
+  },
+  "陰包": {
+    "id": "LR9",
+    "reading": "いんぽう",
+    "meridian": "足厥陰肝経",
+    "location": "大腿部内側、薄筋と縫工筋の間、膝蓋骨底の上方4寸",
+    "notes": ""
+  },
+  "足五里": {
+    "id": "LR10",
+    "reading": "あしごり",
+    "meridian": "足厥陰肝経",
+    "location": "大腿部内側、気衝の下方3寸、動脈拍動部",
+    "notes": ""
+  },
+  "陰廉": {
+    "id": "LR11",
+    "reading": "いんれん",
+    "meridian": "足厥陰肝経",
+    "location": "大腿部内側、気衝の下方2寸",
+    "notes": ""
+  },
+  "急脈": {
+    "id": "LR12",
+    "reading": "きゅうみゃく",
+    "meridian": "足厥陰肝経",
+    "location": "鼡径部、恥骨結合上縁と同じ高さ、前正中線の外方2寸5分",
+    "notes": ""
+  },
+  "章門": {
+    "id": "LR13",
+    "reading": "しょうもん",
+    "meridian": "足厥陰肝経",
+    "location": "側腹部、第11肋骨端下縁",
+    "notes": "脾の募穴、八会穴の臓会"
+  },
+  "期門": {
+    "id": "LR14",
+    "reading": "きもん",
+    "meridian": "足厥陰肝経",
+    "location": "前胸部、第6肋間、前正中線の外方4寸",
+    "notes": "肝の募穴"
+  },
+  "長強": {
+    "id": "GV1",
+    "reading": "ちょうきょう",
+    "meridian": "督脈",
+    "location": "会陰部、尾骨の下方、尾骨端と肛門の中央",
+    "notes": "督脈の絡穴"
+  },
+  "腰兪": {
+    "id": "GV2",
+    "reading": "ようゆ",
+    "meridian": "督脈",
+    "location": "仙骨部、後正中線上、仙骨裂孔",
+    "notes": ""
+  },
+  "腰陽関": {
+    "id": "GV3",
+    "reading": "こしようかん",
+    "meridian": "督脈",
+    "location": "腰部、後正中線上、第４腰椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "命門": {
+    "id": "GV4",
+    "reading": "めいもん",
+    "meridian": "督脈",
+    "location": "腰部、後正中線上、第2腰椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "懸枢": {
+    "id": "GV5",
+    "reading": "けんすう",
+    "meridian": "督脈",
+    "location": "腰部、後正中線上、第１腰椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "脊中": {
+    "id": "GV6",
+    "reading": "せきちゅう",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第11胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "中枢": {
+    "id": "GV7",
+    "reading": "ちゅうすう",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第10胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "筋縮": {
+    "id": "GV8",
+    "reading": "きんしゅく",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第9胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "至陽": {
+    "id": "GV9",
+    "reading": "しよう",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第7胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "霊台": {
+    "id": "GV10",
+    "reading": "れいだい",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第6胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "神道": {
+    "id": "GV11",
+    "reading": "しんどう",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第5胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "身柱": {
+    "id": "GV12",
+    "reading": "しんちゅう",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第３胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "陶道": {
+    "id": "GV13",
+    "reading": "とうどう",
+    "meridian": "督脈",
+    "location": "上背部、後正中線上、第1胸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "大椎": {
+    "id": "GV14",
+    "reading": "だいつい",
+    "meridian": "督脈",
+    "location": "後頸部、後正中線上、第７頸椎棘突起下方の陥凹部",
+    "notes": ""
+  },
+  "瘂門": {
+    "id": "GV15",
+    "reading": "あもん",
+    "meridian": "督脈",
+    "location": "後頸部、後正中線上、第2頸椎棘突起上方の陥凹部",
+    "notes": ""
+  },
+  "風府": {
+    "id": "GV16",
+    "reading": "ふうふ",
+    "meridian": "督脈",
+    "location": "後頸部、後正中線上、外後頭隆起の直下、左右の僧帽筋間の陥凹部",
+    "notes": ""
+  },
+  "脳戸": {
+    "id": "GV17",
+    "reading": "のうこ",
+    "meridian": "督脈",
+    "location": "頭部、外後頭隆起上方の陥凹部",
+    "notes": ""
+  },
+  "強間": {
+    "id": "GV18",
+    "reading": "きょうかん",
+    "meridian": "督脈",
+    "location": "頭部、後正中線上、後髪際の上方4寸",
+    "notes": ""
+  },
+  "後頂": {
+    "id": "GV19",
+    "reading": "ごちょう",
+    "meridian": "督脈",
+    "location": "頭部、後正中線上、後髪際の上方5寸5分",
+    "notes": ""
+  },
+  "百会": {
+    "id": "GV20",
+    "reading": "ひゃくえ",
+    "meridian": "督脈",
+    "location": "頭部、前正中線上、前髪際の後方5寸",
+    "notes": ""
+  },
+  "前頂": {
+    "id": "GV21",
+    "reading": "ぜんちょう",
+    "meridian": "督脈",
+    "location": "頭部、前正中線上、前髪際の後方3寸５分",
+    "notes": ""
+  },
+  "囟会": {
+    "id": "GV22",
+    "reading": "しんえ",
+    "meridian": "督脈",
+    "location": "頭部、前正中線上、前髪際の後方2寸",
+    "notes": ""
+  },
+  "上星": {
+    "id": "GV23",
+    "reading": "じょうせい",
+    "meridian": "督脈",
+    "location": "頭部、前正中線上、前髪際の後方1寸",
+    "notes": ""
+  },
+  "神庭": {
+    "id": "GV24",
+    "reading": "しんてい",
+    "meridian": "督脈",
+    "location": "頭部、前正中線上、前髪際の後方5分",
+    "notes": ""
+  },
+  "素髎": {
+    "id": "GV25",
+    "reading": "そりょう",
+    "meridian": "督脈",
+    "location": "顔面部、鼻の先端",
+    "notes": ""
+  },
+  "水溝": {
+    "id": "GV26",
+    "reading": "すいこう",
+    "meridian": "督脈",
+    "location": "顔面部、人中溝の中央",
+    "notes": ""
+  },
+  "兌端": {
+    "id": "GV27",
+    "reading": "だたん",
+    "meridian": "督脈",
+    "location": "顔面部、上唇結節上縁",
+    "notes": ""
+  },
+  "齦交": {
+    "id": "GV28",
+    "reading": "ぎんこう",
+    "meridian": "督脈",
+    "location": "顔面部、上歯齦、上唇小帯の接合部",
+    "notes": ""
+  },
+  "会陰": {
+    "id": "CV1",
+    "reading": "えいん",
+    "meridian": "任脈",
+    "location": "会陰部、男性は陰囊根部と肛門を結ぶ線の中点、女性は後陰唇交連と肛門を結ぶ線の中点",
+    "notes": ""
+  },
+  "曲骨": {
+    "id": "CV2",
+    "reading": "きょっこつ",
+    "meridian": "任脈",
+    "location": "下腹部、前正中線上、恥骨結合上縁",
+    "notes": ""
+  },
+  "中極": {
+    "id": "CV3",
+    "reading": "ちゅうきょく",
+    "meridian": "任脈",
+    "location": "下腹部、前正中線上、臍中央の下方４寸",
+    "notes": "膀胱の募穴"
+  },
+  "関元": {
+    "id": "CV4",
+    "reading": "かんげん",
+    "meridian": "任脈",
+    "location": "下腹部、前正中線上、臍中央の下方3寸",
+    "notes": "小腸の募穴"
+  },
+  "石門": {
+    "id": "CV5",
+    "reading": "せきもん",
+    "meridian": "任脈",
+    "location": "下腹部、前正中線上、臍中央の下方２寸",
+    "notes": "三焦の募穴"
+  },
+  "気海": {
+    "id": "CV6",
+    "reading": "きかい",
+    "meridian": "任脈",
+    "location": "下腹部、前正中線上、臍中央の下方１寸５分",
+    "notes": ""
+  },
+  "陰交": {
+    "id": "CV7",
+    "reading": "いんこう",
+    "meridian": "任脈",
+    "location": "下腹部、前正中線上、臍中央の下方1寸",
+    "notes": ""
+  },
+  "神闕": {
+    "id": "CV8",
+    "reading": "しんけつ",
+    "meridian": "任脈",
+    "location": "上腹部、臍の中央",
+    "notes": ""
+  },
+  "水分": {
+    "id": "CV9",
+    "reading": "すいぶん",
+    "meridian": "任脈",
+    "location": "上腹部、前正中線上、臍中央の上方１寸",
+    "notes": ""
+  },
+  "下脘": {
+    "id": "CV10",
+    "reading": "げかん",
+    "meridian": "任脈",
+    "location": "上腹部、前正中線上、臍中央の上方２寸",
+    "notes": ""
+  },
+  "建里": {
+    "id": "CV11",
+    "reading": "けんり",
+    "meridian": "任脈",
+    "location": "上腹部、前正中線上、臍中央の上方３寸",
+    "notes": ""
+  },
+  "中脘": {
+    "id": "CV12",
+    "reading": "ちゅうかん",
+    "meridian": "任脈",
+    "location": "上腹部、前正中線上、臍中央の上方４寸",
+    "notes": "胃の募穴、八会穴の腑会"
+  },
+  "上脘": {
+    "id": "CV13",
+    "reading": "じょうかん",
+    "meridian": "任脈",
+    "location": "上腹部、前正中線上、臍中央の上方5寸",
+    "notes": ""
+  },
+  "巨闕": {
+    "id": "CV14",
+    "reading": "こけつ",
+    "meridian": "任脈",
+    "location": "上腹部、前正中線上、臍中央の上方6寸",
+    "notes": "心の募穴"
+  },
+  "鳩尾": {
+    "id": "CV15",
+    "reading": "きゅうび",
+    "meridian": "任脈",
+    "location": "上腹部、前正中線上、胸骨体下端の下方１寸",
+    "notes": "任脈の絡穴"
+  },
+  "中庭": {
+    "id": "CV16",
+    "reading": "ちゅうてい",
+    "meridian": "任脈",
+    "location": "前胸部、前正中線上、胸骨体下端の中点",
+    "notes": ""
+  },
+  "膻中": {
+    "id": "CV17",
+    "reading": "だんちゅう",
+    "meridian": "任脈",
+    "location": "前胸部、前正中線上、第４肋間と同じ高さ",
+    "notes": "心包の募穴、八会穴の気会"
+  },
+  "玉堂": {
+    "id": "CV18",
+    "reading": "ぎょくどう",
+    "meridian": "任脈",
+    "location": "前胸部、前正中線上、第3肋間と同じ高さ",
+    "notes": ""
+  },
+  "紫宮": {
+    "id": "CV19",
+    "reading": "しきゅう",
+    "meridian": "任脈",
+    "location": "前胸部、前正中線上、第2肋間と同じ高さ",
+    "notes": ""
+  },
+  "華蓋": {
+    "id": "CV20",
+    "reading": "かがい",
+    "meridian": "任脈",
+    "location": "前胸部、前正中線上、第1肋間と同じ高さ",
+    "notes": ""
+  },
+  "璇璣": {
+    "id": "CV21",
+    "reading": "せんき",
+    "meridian": "任脈",
+    "location": "前胸部、前正中線上、頸窩の下方１寸",
+    "notes": ""
+  },
+  "天突": {
+    "id": "CV22",
+    "reading": "てんとつ",
+    "meridian": "任脈",
+    "location": "前頸部、前正中線上、頚窩の中央",
+    "notes": ""
+  },
+  "廉泉": {
+    "id": "CV23",
+    "reading": "れんせん",
+    "meridian": "任脈",
+    "location": "前胸部、前正中線上、喉頭隆起上方、舌骨の上方陥凹部",
+    "notes": ""
+  },
+  "承漿": {
+    "id": "CV24",
+    "reading": "しょうしょう",
+    "meridian": "任脈",
+    "location": "顔面部、オトガイ唇溝中央の陥凹部",
+    "notes": ""
+  }
+};
+
+        let board = [];
+        let selectedCell = null;
+        let moveHistory = [];
+        let moves = 0;
+        let acupointIndex = 0;
+        let timerInterval = null;
+        let startTime = null;
+        let elapsedTime = 0;
+        let isGameActive = false;
+        let longPressTimer = null;
+        let isShowingInfo = false;
+        let isLongPress = false;
+
+        function startLongPress(acupointName) {
+            isLongPress = false;
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                showAcupointInfo(acupointName);
+            }, 500); // 0.5秒長押しで表示
+        }
+
+        function endLongPress() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            // ポップアップは自動的に閉じない
+        }
+
+        function showAcupointInfo(acupointName) {
+            const data = ACUPOINT_DATA[acupointName];
+            if (!data) return;
+
+            isShowingInfo = true;
+            document.getElementById('acupoint-name').textContent = acupointName;
+            document.getElementById('acupoint-reading').textContent = data.reading;
+            document.getElementById('acupoint-meridian').textContent = data.meridian;
+            document.getElementById('acupoint-id').textContent = data.id;
+            document.getElementById('acupoint-location').textContent = data.location;
+            document.getElementById('acupoint-notes').textContent = data.notes || 'なし';
+            
+            document.getElementById('acupoint-overlay').classList.add('show');
+            document.getElementById('acupoint-info').classList.add('show');
+        }
+
+        function hideAcupointInfo() {
+            document.getElementById('acupoint-overlay').classList.remove('show');
+            document.getElementById('acupoint-info').classList.remove('show');
+            isShowingInfo = false;
+            isLongPress = false;
+        }
+
+        function initBoard() {
+            board = INITIAL_BOARD.map(row => [...row]);
+            selectedCell = null;
+            moveHistory = [];
+            moves = 0;
+            acupointIndex = 0;
+            elapsedTime = 0;
+            isGameActive = true;
+            renderBoard();
+            updateStats();
+            showMessage('');
+            startTimer();
+        }
+
+        function renderBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+
+            for (let row = 0; row < 7; row++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+
+                for (let col = 0; col < 7; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+
+                    if (board[row][col] === null) {
+                        cell.classList.add('invalid');
+                    } else if (board[row][col] === 1) {
+                        cell.classList.add('hole');
+                        const marble = document.createElement('div');
+                        marble.className = 'marble';
+                        const acupointName = ACUPOINTS[acupointIndex % ACUPOINTS.length];
+                        marble.textContent = acupointName;
+                        marble.dataset.acupoint = acupointName;
+                        
+                        // 長押しイベント（タッチデバイス）
+                        marble.addEventListener('touchstart', (e) => {
+                            e.stopPropagation();
+                            startLongPress(acupointName);
+                        });
+                        marble.addEventListener('touchend', (e) => {
+                            e.stopPropagation();
+                            endLongPress();
+                            // 短いタップの場合はセル選択
+                            if (!isLongPress) {
+                                selectCell(row, col);
+                            }
+                        });
+                        marble.addEventListener('touchcancel', () => {
+                            endLongPress();
+                        });
+                        
+                        // 長押しイベント（マウス）
+                        marble.addEventListener('mousedown', (e) => {
+                            e.stopPropagation();
+                            startLongPress(acupointName);
+                        });
+                        marble.addEventListener('mouseup', (e) => {
+                            e.stopPropagation();
+                            endLongPress();
+                        });
+                        marble.addEventListener('mouseleave', () => {
+                            endLongPress();
+                        });
+                        
+                        // クリックイベント
+                        marble.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (!isLongPress) {
+                                selectCell(row, col);
+                            }
+                        });
+                        
+                        acupointIndex++;
+                        cell.appendChild(marble);
+                    } else {
+                        cell.classList.add('empty');
+                        cell.onclick = () => moveMarble(row, col);
+                    }
+
+                    rowDiv.appendChild(cell);
+                }
+
+                boardElement.appendChild(rowDiv);
+            }
+        }
+
+        function selectCell(row, col) {
+            if (board[row][col] !== 1) return;
+
+            // 既に選択されているセルをクリックした場合は選択解除
+            if (selectedCell && selectedCell.row === row && selectedCell.col === col) {
+                selectedCell = null;
+                renderBoard();
+                return;
+            }
+
+            selectedCell = { row, col };
+            renderBoard();
+
+            // 選択されたセルをハイライト
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                const r = parseInt(cell.dataset.row);
+                const c = parseInt(cell.dataset.col);
+                if (r === row && c === col) {
+                    cell.classList.add('selected');
+                }
+            });
+
+            // 可能な移動先を表示
+            highlightValidMoves(row, col);
+        }
+
+        function highlightValidMoves(row, col) {
+            const directions = [
+                [-2, 0], [2, 0], [0, -2], [0, 2]  // 上、下、左、右
+            ];
+
+            directions.forEach(([dr, dc]) => {
+                const newRow = row + dr;
+                const newCol = col + dc;
+                const midRow = row + dr / 2;
+                const midCol = col + dc / 2;
+
+                if (isValidMove(row, col, newRow, newCol)) {
+                    const cells = document.querySelectorAll('.cell');
+                    cells.forEach(cell => {
+                        const r = parseInt(cell.dataset.row);
+                        const c = parseInt(cell.dataset.col);
+                        if (r === newRow && c === newCol) {
+                            cell.classList.add('valid-move');
+                        }
+                    });
+                }
+            });
+        }
+
+        function isValidMove(fromRow, fromCol, toRow, toCol) {
+            // 範囲チェック
+            if (toRow < 0 || toRow >= 7 || toCol < 0 || toCol >= 7) return false;
+            
+            // 移動先が有効なマスで空であることを確認
+            if (board[toRow][toCol] !== 0) return false;
+
+            // 移動距離を計算
+            const rowDiff = Math.abs(toRow - fromRow);
+            const colDiff = Math.abs(toCol - fromCol);
+
+            // 正確に2マスの移動で、かつ上下左右のみ（斜め禁止）
+            // 上下移動：rowDiff = 2, colDiff = 0
+            // 左右移動：rowDiff = 0, colDiff = 2
+            if (!((rowDiff === 2 && colDiff === 0) || (rowDiff === 0 && colDiff === 2))) {
+                return false;
+            }
+
+            // 飛び越えるビー玉の位置
+            const midRow = (fromRow + toRow) / 2;
+            const midCol = (fromCol + toCol) / 2;
+
+            // 飛び越えるビー玉が存在することを確認
+            if (board[midRow][midCol] !== 1) return false;
+
+            return true;
+        }
+
+        function moveMarble(toRow, toCol) {
+            if (!selectedCell) return;
+
+            const fromRow = selectedCell.row;
+            const fromCol = selectedCell.col;
+
+            if (isValidMove(fromRow, fromCol, toRow, toCol)) {
+                const midRow = (fromRow + toRow) / 2;
+                const midCol = (fromCol + toCol) / 2;
+
+                // 履歴を保存
+                moveHistory.push({
+                    from: { row: fromRow, col: fromCol },
+                    to: { row: toRow, col: toCol },
+                    jumped: { row: midRow, col: midCol }
+                });
+
+                // ビー玉を移動
+                board[fromRow][fromCol] = 0;
+                board[midRow][midCol] = 0;
+                board[toRow][toCol] = 1;
+
+                moves++;
+                selectedCell = null;
+                renderBoard();
+                updateStats();
+                checkGameOver();
+
+                document.getElementById('undo-btn').disabled = false;
+            }
+        }
+
+        function undoMove() {
+            if (moveHistory.length === 0) return;
+
+            const lastMove = moveHistory.pop();
+            
+            board[lastMove.from.row][lastMove.from.col] = 1;
+            board[lastMove.jumped.row][lastMove.jumped.col] = 1;
+            board[lastMove.to.row][lastMove.to.col] = 0;
+
+            moves--;
+            selectedCell = null;
+            renderBoard();
+            updateStats();
+            showMessage('');
+
+            if (moveHistory.length === 0) {
+                document.getElementById('undo-btn').disabled = true;
+            }
+        }
+
+        function countMarbles() {
+            let count = 0;
+            for (let row = 0; row < 7; row++) {
+                for (let col = 0; col < 7; col++) {
+                    if (board[row][col] === 1) count++;
+                }
+            }
+            return count;
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isGameActive = false;
+        }
+
+        function updateTimer() {
+            if (!isGameActive) return;
+            elapsedTime = Date.now() - startTime;
+            const seconds = Math.floor(elapsedTime / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateStats() {
+            document.getElementById('marbles-count').textContent = countMarbles();
+            document.getElementById('moves-count').textContent = moves;
+        }
+
+        function hasValidMoves() {
+            for (let row = 0; row < 7; row++) {
+                for (let col = 0; col < 7; col++) {
+                    if (board[row][col] === 1) {
+                        const directions = [
+                            [-2, 0], [2, 0], [0, -2], [0, 2]
+                        ];
+                        for (let [dr, dc] of directions) {
+                            if (isValidMove(row, col, row + dr, col + dc)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function checkGameOver() {
+            const marblesLeft = countMarbles();
+            
+            if (marblesLeft === 1) {
+                stopTimer();
+                const finalTime = document.getElementById('timer').textContent;
+                showMessage(`🎉 おめでとうございます！完璧です！\n⏱️ タイム: ${finalTime}`, 'win');
+            } else if (!hasValidMoves()) {
+                stopTimer();
+                const finalTime = document.getElementById('timer').textContent;
+                showMessage(`ゲーム終了！残りのビー玉: ${marblesLeft}個\n⏱️ タイム: ${finalTime}`, 'info');
+            }
+        }
+
+        function showMessage(text, type = '') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+        }
+
+        function resetGame() {
+            initBoard();
+            document.getElementById('undo-btn').disabled = true;
+        }
+
+        function quitGame() {
+            if (!isGameActive && moves === 0) {
+                showMessage('ゲームを開始していません。', 'info');
+                return;
+            }
+            
+            if (confirm('ゲームを終了しますか？\n現在の記録は失われます。')) {
+                stopTimer();
+                isGameActive = false;
+                const finalTime = document.getElementById('timer').textContent;
+                const marblesLeft = countMarbles();
+                showMessage(`ゲームを終了しました。\n残りのビー玉: ${marblesLeft}個 | 手数: ${moves}手 | タイム: ${finalTime}`, 'info');
+            }
+        }
+
+        // 初期化
+        initBoard();
+    </script>
+
+    <script>
+        // Service Worker登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // インストールプロンプト
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('💡 PWAインストール可能');
+        });
+    </script>
+
+</body>
+</html>
